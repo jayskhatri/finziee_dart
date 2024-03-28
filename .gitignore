@@ -1,3 +1,5 @@
 /.dart_tool
 /.vscode
 */.gradle
+/build/
+/pubspec.lock
