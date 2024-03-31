@@ -2,4 +2,9 @@
 /.vscode
 */.gradle
 /build/
-/pubspec.lock
+pubspec.lock
+.flutter-plugins
+.flutter-plugins-dependencies
+.idea
+.metadata
+.DS_store
