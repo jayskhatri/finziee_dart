@@ -1,6 +1,7 @@
 import 'package:finziee_dart/db_helper/category_db_controller.dart';
 import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/pages/components/selectable_button.dart';
+import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:finziee_dart/util/color.dart';
 import 'package:get/get.dart';
@@ -30,6 +31,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const DrawerNavigation(),
       appBar: AppBar(
         title: const Text('Categories'),
         centerTitle: true,
@@ -53,12 +55,12 @@ class _CategoriesPageState extends State<CategoriesPage> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           color: Color(int.parse('0xFF${_categories[index].catColor}')),
           child: InkWell(
-            splashColor: Colors.red,
+            splashColor: Colors.blue[300],
             onTap: () {
               _createCategoryDialog(context, true, _categories[index]);
             },
             child: Column(children: [
-                    SizedBox(
+                    const SizedBox(
                       height: 6,
                     ),
                     Row(
@@ -68,7 +70,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       Text(_categories[index].catName??''),
                       _getIconBasedOnType(_categories[index].catType??0),
                   ],),
-                  SizedBox(
+                  const SizedBox(
                     height: 6,
                   ),
               ],),
@@ -107,12 +109,10 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
   void _createCategoryDialog(BuildContext context, bool isEditModeOn, CategoryModel categoryModel) {
     //set all attributes from categoryModel if edit mode is on
-    if(isEditModeOn){
-      _categoryNameController.text = categoryModel.catName??'';
-      _colorIndex = Colour.colorList.keys.toList().indexOf(categoryModel.catColor??'');
-      _isFavorite = categoryModel.catIsFav??false;
-      _isExpense = categoryModel.catType == 0 ? true : false;
-    }
+    _categoryNameController.text = categoryModel.catName??'';
+    _colorIndex = Colour.colorList.keys.toList().indexOf(categoryModel.catColor??'');
+    _isFavorite = categoryModel.catIsFav??false;
+    _isExpense = categoryModel.catType == 0 ? true : false;
     
     showDialog(
       context: context,

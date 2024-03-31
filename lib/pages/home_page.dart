@@ -1,5 +1,7 @@
+import 'package:finziee_dart/db_helper/category_db_controller.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -9,6 +11,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final CategoryController categoryController = Get.put(CategoryController());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,7 +20,7 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
         elevation: 0.0,
       ),
-      drawer: DrawerNavigation(),
+      drawer: const DrawerNavigation(),
       body: const Center(
         child: Text('Home Page'),
       ),

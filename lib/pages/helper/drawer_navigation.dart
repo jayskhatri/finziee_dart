@@ -1,4 +1,5 @@
 import 'package:finziee_dart/pages/categories_page.dart';
+import 'package:finziee_dart/pages/transaction_page.dart';
 import 'package:flutter/material.dart';
 
 class DrawerNavigation extends StatefulWidget {
@@ -9,7 +10,6 @@ class DrawerNavigation extends StatefulWidget {
 }
 
 class _DrawerNavigationState extends State<DrawerNavigation> {
-  
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -26,11 +26,18 @@ class _DrawerNavigationState extends State<DrawerNavigation> {
                 color: Colors.blue,
               ),
               ),
-
+              ListTile(
+                leading: const Icon(Icons.home),
+                title: const Text('Home'),
+                onTap: (){},
+              ),
               ListTile(
                 leading: const Icon(Icons.monetization_on),
                 title: const Text('Transactions'),
-                onTap: (){},
+                onTap: (){
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const TransactionPage()));
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.autorenew_rounded),
@@ -40,8 +47,13 @@ class _DrawerNavigationState extends State<DrawerNavigation> {
               ListTile(
                 leading: const Icon(Icons.category),
                 title: const Text('Categories'),
-                onTap: (){Navigator.push(context, MaterialPageRoute(builder: (context) => const CategoriesPage()));},
+                onTap: (){
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/categories');
+                  
+                },
               ),
+              const Divider(color: Colors.black87),
               ListTile(
                 leading: const Icon(Icons.settings),
                 title: const Text('Settings'),
