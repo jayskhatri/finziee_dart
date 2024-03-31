@@ -12,6 +12,22 @@ class CategoryController{
   }
 
   Future<List<CategoryModel>> getCategories() async {
-    return await DBHelper.getCategories();
+    List<Map<String,dynamic>> categories = await DBHelper.getCategories();
+    categoriesList.assignAll(categories.map((data) =>  CategoryModel.fromJson(data)).toList());
+    return categoriesList;
+  }
+
+  Future<int> updateCategory({CategoryModel? category}) async {
+    return await DBHelper.updateCategory(category!);
+  }
+
+  //delete full table
+  void deleteAllCategories() async {
+    DBHelper.deleteAllCategories();
+  }
+
+  //delete particular category
+  Future<int> deleteCategory(int? id) async {
+    return await DBHelper.deleteCategory(id!);
   }
 }

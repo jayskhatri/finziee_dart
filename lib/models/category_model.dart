@@ -1,12 +1,12 @@
 class CategoryModel{
   int? catId;
   String? catName;
-  String? catType;
-  String? catCount;
-  String? catColorId;
-  String? catIsFav;
+  int? catType;
+  int? catCount;
+  String? catColor;
+  bool? catIsFav;
 
-  CategoryModel({this.catId, this.catName, this.catType, this.catCount, this.catColorId, this.catIsFav});
+  CategoryModel({this.catId, this.catName, this.catType, this.catCount, this.catColor, this.catIsFav});
 
   factory CategoryModel.fromJson(Map<String, dynamic> json){
     return CategoryModel(
@@ -14,8 +14,8 @@ class CategoryModel{
       catName: json['cat_name'],
       catType: json['cat_type'],
       catCount: json['cat_count'],
-      catColorId: json['cat_color_id'],
-      catIsFav: json['cat_is_fav'],
+      catColor: json['cat_color'],
+      catIsFav: json['cat_is_fav'] == 1 ? true : false,
     );
   }
 
@@ -25,8 +25,8 @@ class CategoryModel{
       'cat_name': catName,
       'cat_type': catType,
       'cat_count': catCount,
-      'cat_color_id': catColorId,
-      'cat_is_fav': catIsFav,
+      'cat_color': catColor,
+      'cat_is_fav': catIsFav == true ? 1 : 0,
     };
   }
 }

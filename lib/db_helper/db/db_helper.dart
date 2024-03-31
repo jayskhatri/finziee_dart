@@ -30,10 +30,10 @@ class DBHelper {
           CREATE TABLE IF NOT EXISTS categories(
             cat_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
             cat_name TEXT NOT NULL,
-            cat_type TEXT,
+            cat_type INTEGER DEFAULT 0,
             cat_count INTEGER, 
-            cat_color_id INTEGER, 
-            cat_is_fav INTEGER DEFAULT 0
+            cat_color STRING, 
+            cat_is_fav BOOL DEFAULT 0
           )
         ''';
         await db.execute(categoriesTableCreationQuery);
@@ -46,12 +46,11 @@ class DBHelper {
     return await db.insert('categories', category.toJson());
   }
 
-  static Future<List<CategoryModel>> getCategories() async {
+  static Future<List<Map<String,dynamic>>> getCategories() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('categories');
-    return List.generate(maps.length, (i) {
-      return CategoryModel.fromJson(maps[i]);
-    });
+    print('size of fetched catagories: ${maps.length}');
+    return maps;
   }
 
   static Future<int> updateCategory(CategoryModel category) async {
@@ -76,5 +75,12 @@ class DBHelper {
   static Future<List<Map<String, dynamic>>> getCategoryById(int id) async {
     final db = await database;
     return db.query('categories',where: 'id=?',whereArgs: [id],limit: 1);
+  }
+
+  static void deleteAllCategories() async {
+    final db = await database;
+    String query = 'DROP TABLE IF EXISTS categories';
+    await db.execute(query);
+    print('deleted all categories');
   }
 }

@@ -18,8 +18,24 @@ class _HomePageState extends State<HomePage> {
         elevation: 0.0,
       ),
       drawer: DrawerNavigation(),
-      body: const Center(
-        child: Text('Welcome to Finziee'),
+      body: ListView(
+        children: <Widget>[
+          Container(
+            height: 80.0,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: List.generate(10, (int index) {
+                return Card(
+                  color: Colors.blue[index * 100],
+                  child: Container(
+                    width: 50.0,
+                    height: 50.0,
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: someMethod,
