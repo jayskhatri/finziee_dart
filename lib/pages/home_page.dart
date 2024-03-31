@@ -18,24 +18,8 @@ class _HomePageState extends State<HomePage> {
         elevation: 0.0,
       ),
       drawer: DrawerNavigation(),
-      body: ListView(
-        children: <Widget>[
-          Container(
-            height: 80.0,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: List.generate(10, (int index) {
-                return Card(
-                  color: Colors.blue[index * 100],
-                  child: Container(
-                    width: 50.0,
-                    height: 50.0,
-                  ),
-                );
-              }),
-            ),
-          ),
-        ],
+      body: const Center(
+        child: Text('Home Page'),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: someMethod,
