@@ -43,7 +43,10 @@ class _DrawerNavigationState extends State<DrawerNavigation> {
               ListTile(
                 leading: const Icon(Icons.autorenew_rounded),
                 title: const Text('Recurrings'),
-                onTap: (){},
+                onTap: (){
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  Navigator.pushReplacementNamed(context, '/recurring');
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.category),
