@@ -21,7 +21,7 @@ class _RecurringPageState extends State<RecurringPage> {
   final CategoryController _categoryController = Get.find();
 
   DateTime now = DateTime.now();
-  DateFormat dateFormat = DateFormat('dd');
+  DateFormat dateFormat = DateFormat('d');
   DateFormat monthFormat = DateFormat('MMMM');
   DateFormat yearFormat = DateFormat('yyyy');
   DateFormat dayFormat = DateFormat('EEEE');
@@ -35,7 +35,7 @@ class _RecurringPageState extends State<RecurringPage> {
 
   int selectedCategoryIndex = 0;
   final List<String> _recurTypes = ["Daily", "Weekly", "Monthly", "Yearly"];
-  String dropdownValue = 'Daily';
+  String recurTypeDropdownValue = 'Daily';
   String dayDropDown = 'Monday';
   String dateDropDown = '1';
   String dayYearlyDropdown = '1';
@@ -108,13 +108,17 @@ class _RecurringPageState extends State<RecurringPage> {
     
     DateTime selectedDate = DateTime.now();
     _dateController.text = DateFormat('yyyy-MM-dd').format(selectedDate);
-    dropdownValue = 'Daily';
+    recurTypeDropdownValue = 'Daily';
     _recurAmountController.text = '';
     _recurNoteController.text = '';
     _selectedCategoryController.text = '';
     dateDropDown = dateFormat.format(now);
     dayYearlyDropdown = dateFormat.format(now);
     monthYearlyDropdown = monthFormat.format(now);
+    selectedCategoryIndex = 0;
+    _recurTimePickerController.text = '10:00 PM';//TimeOfDay.now().format(context);
+    _dayMonthController.text = dayYearlyDropdown + ' ' + monthYearlyDropdown;
+
 
     showDialog(
       context: context,
@@ -131,14 +135,39 @@ class _RecurringPageState extends State<RecurringPage> {
             TextButton(
               onPressed: () {
                 if (isEdit) {
-                  print('updated recur transaction with ${_recurAmountController.text}, ${_recurNoteController.text}, ${_categories[selectedCategoryIndex].catId}, $dropdownValue');
+                    print('Data in update mode:');
+                    print('_recurAmountController: ${_recurAmountController.text}');
+                    print('_recurNoteController: ${_recurNoteController.text}');
+                    print('_selectedCategoryController: ${_selectedCategoryController.text}');
+                    print('_recurTimePickerController: ${_recurTimePickerController.text}');
+
+                    print('Data in variables:');
+                    print('selectedDate: $selectedDate');
+                    print('recurTypeDropdownValue: $recurTypeDropdownValue');
+                    print('selectedCategoryIndex: $selectedCategoryIndex');
+                    print('dateDropDown: $dateDropDown');
+                    print('dayYearlyDropdown: $dayYearlyDropdown');
+                    print('monthYearlyDropdown: $monthYearlyDropdown');
+                  
                   // _updateRecurringTransaction(RecurrenceModel(
                   //   recurAmount: _recurAmountController.text,
                   //   recurNote: _recurNoteController.text,
                   //   recurCatId: _categories[selectedCategoryIndex].catId,
                   // ));
                 } else {
-                  print('saved recur transaction with ${_recurAmountController.text}, ${_recurNoteController.text}, ${_categories[selectedCategoryIndex].catId}, $dropdownValue');
+                    print('Data in add mode:');
+                    print('_recurAmountController: ${_recurAmountController.text}');
+                    print('_recurNoteController: ${_recurNoteController.text}');
+                    print('_selectedCategoryController: ${_selectedCategoryController.text}');
+                    print('_recurTimePickerController: ${_recurTimePickerController.text}');
+
+                    print('Data in variables:');
+                    print('selectedDate: $selectedDate');
+                    print('user selected recurTypeDropdownValue: $recurTypeDropdownValue');
+                    print('selectedCategoryIndex: $selectedCategoryIndex');
+                    print('dateDropDown: $dateDropDown');
+                    print('dayYearlyDropdown: $dayYearlyDropdown');
+                    print('monthYearlyDropdown: $monthYearlyDropdown');
                   // _createRecurringTransaction();
                 }
                 Navigator.of(context).pop();
@@ -200,13 +229,13 @@ class _RecurringPageState extends State<RecurringPage> {
                         }).toList(),
                         onChanged: (String? value) {
                           setState(() {
-                            dropdownValue = value??'Daily';
+                            recurTypeDropdownValue = value??'Daily';
                           });
                         },
                       ),
                     ),
                     const SizedBox(width: 10.0),
-                    _getWidgetBasedOnRecurType(dropdownValue, setState),
+                    _getWidgetBasedOnRecurType(recurTypeDropdownValue, setState),
                     const SizedBox(width: 10.0,)
                   ],
                 ),
@@ -340,8 +369,8 @@ class _RecurringPageState extends State<RecurringPage> {
     );
   }
 
-  dynamic _getWidgetBasedOnRecurType(String dropdownValue, StateSetter setState) {
-    if (dropdownValue == 'Daily') {
+  dynamic _getWidgetBasedOnRecurType(String recurTypeDropdownValue, StateSetter setState) {
+    if (recurTypeDropdownValue == 'Daily') {
       _recurTimePickerController.text = '10:00 PM';//TimeOfDay.now().format(context);
       return Expanded(
         child: TextField(
@@ -367,13 +396,13 @@ class _RecurringPageState extends State<RecurringPage> {
           // },
         ),
       );
-    } else if (dropdownValue == 'Weekly') {
+    } else if (recurTypeDropdownValue == 'Weekly') {
       dayDropDown = dayFormat.format(now);
       return Expanded(
         child: DropdownButtonFormField(
           isExpanded: true,
           decoration: InputDecoration(
-            labelText: 'Select Day',
+            labelText: 'Day',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20.0),
             ),
@@ -393,18 +422,18 @@ class _RecurringPageState extends State<RecurringPage> {
           },
         ),
       );
-    } else if (dropdownValue == 'Monthly') {
-      dateDropDown = dateFormat.format(now);      
+    } else if (recurTypeDropdownValue == 'Monthly') {
+      dateDropDown = dateFormat.format(now);  
       return Expanded(
         child: DropdownButtonFormField(
           decoration: InputDecoration(
-            labelText: 'Select Date',
+            labelText: 'Date',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20.0),
             ),
             contentPadding: const EdgeInsets.all(10.0),
           ),
-          value: dayDropDown,
+          value: dateDropDown,
           items: _choicesMonthly.map((String value) {
             return DropdownMenuItem<String>(
               value: value,
@@ -418,7 +447,7 @@ class _RecurringPageState extends State<RecurringPage> {
           },
         ),
       );
-    } else if (dropdownValue == 'Yearly') {
+    } else if (recurTypeDropdownValue == 'Yearly') {
       dayYearlyDropdown = dateFormat.format(now);
       monthYearlyDropdown = monthFormat.format(now);
       _dayMonthController.text = dayYearlyDropdown + ' ' + monthYearlyDropdown;
