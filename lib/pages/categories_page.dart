@@ -20,7 +20,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   bool _isFavorite = false;
   bool _isExpense = true;
   List<CategoryModel> _categories = [];
-  final CategoryController _categoryController = Get.put(CategoryController());
+  final CategoryController _categoryController = Get.find();
 
   @override
   void initState() {
@@ -48,7 +48,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
     );
   }
 
-  //ui widgets related helper functions
+  //ui helper functions
   Card _generateItemList(int index) {
     return Card(
           elevation: 20,

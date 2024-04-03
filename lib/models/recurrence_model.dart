@@ -3,7 +3,7 @@ class RecurrenceModel{
   String? recurAmount;
   String? recurNote;
   int? recurCatId;
-  int? recurType;
+  int? recurType; //0 - daily, 1 - weekly(take day), 2-monthly (take date), 3-yearly(take date and month)
   String? recurOn;
 
   RecurrenceModel({this.recurId, this.recurAmount, this.recurNote, this.recurCatId, this.recurType, this.recurOn});

@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
           debugShowCheckedModeBanner: false,
-          initialRoute: '/',
+          initialRoute: '/recurring',
           theme: Themes.light,
           darkTheme: Themes.dark,
           themeMode: ThemeServices().theme,
