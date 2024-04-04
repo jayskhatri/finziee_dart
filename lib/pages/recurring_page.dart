@@ -2,6 +2,7 @@ import 'package:finziee_dart/db_helper/category_db_controller.dart';
 import 'package:finziee_dart/db_helper/recurrence_db_controller.dart';
 import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/models/recurrence_model.dart';
+import 'package:finziee_dart/pages/helper/create_category_dialog.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -72,6 +73,12 @@ class _RecurringPageState extends State<RecurringPage> {
     super.initState();
     _getRecurringTransactions();
     _getCategories();
+  }
+
+  void updateCategoriesLocally(List<CategoryModel> categories) {
+    setState(() {
+      _categories = categories;
+    });
   }
 
   @override
@@ -494,6 +501,11 @@ class _RecurringPageState extends State<RecurringPage> {
                         title: const Text('Add Category'),
                         onTap: () {
                           //add category dialog box open
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                                return CreateCategoryDialog(isEditModeOn: false, categoryModel: CategoryModel(), setStateInCallingPage: setState, categories: _categories,);
+                            });
                         },
                       ),
                     ),
