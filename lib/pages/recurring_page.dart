@@ -4,6 +4,7 @@ import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/models/recurrence_model.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
 import 'package:finziee_dart/pages/helper/select_category_dialog.dart';
+import 'package:finziee_dart/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -83,7 +84,7 @@ class _RecurringPageState extends State<RecurringPage> {
       ),
       drawer: const DrawerNavigation(),
       body: ListView.builder(
-          itemCount: _recurrences.length,
+          itemCount: 1,
           itemBuilder: (context, index) {
             return _generateRecurringItemList(index);
           }),
@@ -91,8 +92,11 @@ class _RecurringPageState extends State<RecurringPage> {
     );
   }
 
-  Card _generateRecurringItemList(int index) {
-    return const Card();
+  Center _generateRecurringItemList(int index) {
+    return Center(child: TextButton(onPressed: (){
+      print('object');
+      NotificationService().scheduledNotification(hour: 0, minutes: 0, id: 222, sound: 'water.mp3');
+    }, child: Text('Recurring Item', style: TextStyle(color: Colors.white, backgroundColor: Colors.blue, fontSize: 20),)));
   }
 
   FloatingActionButton _createRecurringTransactionButton(
@@ -105,7 +109,7 @@ class _RecurringPageState extends State<RecurringPage> {
     );
   }
 
-  String generateDate(){
+  String getRecurrenceOnDate(){
       DateTime now = DateTime.now();
       DateTime generatedDate = now;
       String time = '10:00 PM';
@@ -201,7 +205,7 @@ class _RecurringPageState extends State<RecurringPage> {
                     print('dayDropdown in weekly: $dayDropDown');
                     print('dayYearlyDropdown: $dayYearlyDropdown');
                     print('monthYearlyDropdown: $monthYearlyDropdown');
-                    print('generateDate: ${generateDate()}');
+                    print('getRecurrenceOnDate: ${getRecurrenceOnDate()}');
                     // RecurrenceModel recurrenceModel = RecurrenceModel();
                     // recurrenceModel.recurAmount = _recurAmountController.text;
                     // recurrenceModel.recurNote = _recurNoteController.text;
@@ -314,7 +318,11 @@ class _RecurringPageState extends State<RecurringPage> {
   }
 
   dynamic _getIconWidget(){
-    return Icon(Icons.circle, color: Color(int.parse('0xFF${_categories[selectedCategoryIndex].catColor}')));
+    if(_categories.isEmpty){
+      return const Icon(Icons.circle, color: Colors.grey);
+    }else if(_categories.isNotEmpty && selectedCategoryIndex < _categories.length){
+      return Icon(Icons.circle, color: Color(int.parse('0xFF${_categories[selectedCategoryIndex].catColor}')));
+    }
   }
 
   dynamic _getYearAndMonthDialog(BuildContext context) {
@@ -458,9 +466,11 @@ class _RecurringPageState extends State<RecurringPage> {
             );
           }).toList(),
           onChanged: (String? value) {
+            print('before $dayDropDown');
             setState(() {
               dayDropDown = value ?? 'Monday';
             });
+            print('after $dayDropDown');
           },
         ),
       );
