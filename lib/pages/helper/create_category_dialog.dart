@@ -6,11 +6,11 @@ import 'package:finziee_dart/models/category_model.dart';
 import 'package:get/get.dart';
 
 class CreateCategoryDialog extends StatefulWidget {
-  bool isEditModeOn;
-  CategoryModel categoryModel;
-  Function setStateInCallingPage;
-  List<CategoryModel> categories = [];
-  CreateCategoryDialog({required this.isEditModeOn, required this.categoryModel, required this.setStateInCallingPage, required this.categories});
+  final bool isEditModeOn;
+  final CategoryModel categoryModel;
+  final Function setStateInCallingPage;
+  final List<CategoryModel> categories;
+  const CreateCategoryDialog({super.key, required this.isEditModeOn, required this.categoryModel, required this.setStateInCallingPage, required this.categories});
 
   @override
   State<CreateCategoryDialog> createState() => _CreateCategoryDialogState(isEditModeOn: isEditModeOn, categoryModel: categoryModel, setStateInCallingPage: setStateInCallingPage, categories: categories);
