@@ -2,8 +2,8 @@ import 'package:finziee_dart/db_helper/category_db_controller.dart';
 import 'package:finziee_dart/db_helper/recurrence_db_controller.dart';
 import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/models/recurrence_model.dart';
-import 'package:finziee_dart/pages/helper/create_category_dialog.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
+import 'package:finziee_dart/pages/helper/select_category_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -73,12 +73,6 @@ class _RecurringPageState extends State<RecurringPage> {
     super.initState();
     _getRecurringTransactions();
     _getCategories();
-  }
-
-  void updateCategoriesLocally(List<CategoryModel> categories) {
-    setState(() {
-      _categories = categories;
-    });
   }
 
   @override
@@ -477,80 +471,18 @@ class _RecurringPageState extends State<RecurringPage> {
     }
   }
 
+  void setSelectedCategoryIndex(int index) {
+    setState(() {
+      selectedCategoryIndex = index;
+    });
+  }
+  
   dynamic _dialogBox(BuildContext context, StateSetter setState) {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Select Category'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Expanded(child: _buildView(context, setState)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      width: double.maxFinite,
-                      child: ListTile(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
-                        leading: const Icon(Icons.add),
-                        title: const Text('Add Category'),
-                        onTap: () {
-                          //add category dialog box open
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                                return CreateCategoryDialog(isEditModeOn: false, categoryModel: CategoryModel(), setStateInCallingPage: setState, categories: _categories,);
-                            });
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
+        return SelectCategoryDialog(categories: _categories, setStateInCallingPage: setState, setSelectedCategoryIndex: setSelectedCategoryIndex, selectedCategoryIndex: selectedCategoryIndex, selectedCategoryController: _selectedCategoryController);
       },
-    );
-  }
-
-  Widget _buildView(BuildContext context, StateSetter setState) {
-    _getCategories();
-    return SizedBox(
-      width: double.maxFinite,
-      child: ListView.separated(
-        shrinkWrap: true,
-        itemCount: _categories.length,
-        separatorBuilder: (BuildContext context, int index) => const Divider(),
-        itemBuilder: (BuildContext context, int index) {
-          return Card(
-            elevation: 5.0,
-            color: Color(int.parse('0xFF${_categories[index].catColor}')),
-            child: ListTile(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              leading: Icon(_categories[index].catType == 0
-                  ? Icons.arrow_downward
-                  : Icons.arrow_upward),
-              title: Text(_categories[index].catName.toString()),
-              onTap: () {
-                setState(() {
-                  selectedCategoryIndex = index;
-                  _selectedCategoryController.text = _categories[index].catName.toString();
-                });
-                print('selected : ${_selectedCategoryController.text}');
-                Navigator.of(context).pop();
-              },
-            ),
-          );
-        },
-      ),
     );
   }
 
