@@ -1,10 +1,8 @@
 import 'package:finziee_dart/db_helper/category_db_controller.dart';
 import 'package:finziee_dart/models/category_model.dart';
-import 'package:finziee_dart/pages/components/selectable_button.dart';
 import 'package:finziee_dart/pages/helper/create_category_dialog.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
 import 'package:flutter/material.dart';
-import 'package:finziee_dart/util/color.dart';
 import 'package:get/get.dart';
 
 class CategoriesPage extends StatefulWidget {
@@ -16,10 +14,7 @@ class CategoriesPage extends StatefulWidget {
 
 class _CategoriesPageState extends State<CategoriesPage> {
 
-  final TextEditingController _categoryNameController = TextEditingController();
-  int _colorIndex = 0;
   bool _isFavorite = false;
-  bool _isExpense = true;
   List<CategoryModel> _categories = [];
   final CategoryController _categoryController = Get.find();
 
@@ -109,12 +104,6 @@ class _CategoriesPageState extends State<CategoriesPage> {
   }
 
   void _createCategoryDialog(BuildContext context, bool isEditModeOn, CategoryModel categoryModel) {
-    //set all attributes from categoryModel if edit mode is on
-    _categoryNameController.text = categoryModel.catName??'';
-    _colorIndex = Colour.colorList.keys.toList().indexOf(categoryModel.catColor??'');
-    _isFavorite = categoryModel.catIsFav??false;
-    _isExpense = categoryModel.catType == 0 ? true : false;
-    
     showDialog(
       context: context,
       builder: (context) {
