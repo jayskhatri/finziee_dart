@@ -50,7 +50,7 @@ class _RecurringPageState extends State<RecurringPage> {
     'Saturday',
     'Sunday'
   ];
-  final List<String> _choicesMonthly = List.generate(31, (index) => (index + 1).toString());
+  final List<String> _choicesMonthly = List.generate(28, (index) => (index + 1).toString());
   final List<String> _choicesMonthNames = [
     'January',
     'February',
@@ -103,6 +103,37 @@ class _RecurringPageState extends State<RecurringPage> {
       },
       child: const Icon(Icons.add),
     );
+  }
+
+  String generateDate(){
+      DateTime now = DateTime.now();
+      DateTime generatedDate = now;
+      String time = '10:00 PM';
+
+      if (recurTypeDropdownValue == 'Daily') {
+        generatedDate = DateTime(now.year, now.month, now.day);
+      } else if (recurTypeDropdownValue == 'Weekly') {
+        int selectedDayIndex = _choicesWeekly.indexOf(dayDropDown);
+        int daysToAdd = (selectedDayIndex - now.weekday + 7) % 7;
+        generatedDate = now.add(Duration(days: (daysToAdd + 1)));
+      } else if (recurTypeDropdownValue == 'Monthly') {
+        int selectedDateValue = int.parse(dateDropDown);
+        if (selectedDateValue < now.day) {
+          generatedDate = DateTime(now.year, now.month + 1, selectedDateValue);
+        } else {
+          generatedDate = DateTime(now.year, now.month, selectedDateValue);
+        }
+      } else if (recurTypeDropdownValue == 'Yearly') {
+        int selectedDateValue = int.parse(dayYearlyDropdown);
+        int selectedMonthIndex = _choicesMonthNames.indexOf(monthYearlyDropdown);
+        generatedDate = DateTime(now.year, selectedMonthIndex + 1, selectedDateValue);
+        if (generatedDate.isBefore(now)) {
+          generatedDate = DateTime(now.year + 1, selectedMonthIndex + 1, selectedDateValue);
+        }
+      }
+
+      String formattedDate = DateFormat('yyyy-MM-dd').format(generatedDate);
+      return formattedDate + ' ' + time;
   }
 
   void _generateAddRecurringTransactionDialog(BuildContext context, bool isEdit) {
@@ -167,8 +198,16 @@ class _RecurringPageState extends State<RecurringPage> {
                     print('user selected recurTypeDropdownValue: $recurTypeDropdownValue');
                     print('selectedCategoryIndex: $selectedCategoryIndex');
                     print('dateDropDown: $dateDropDown');
+                    print('dayDropdown in weekly: $dayDropDown');
                     print('dayYearlyDropdown: $dayYearlyDropdown');
                     print('monthYearlyDropdown: $monthYearlyDropdown');
+                    print('generateDate: ${generateDate()}');
+                    // RecurrenceModel recurrenceModel = RecurrenceModel();
+                    // recurrenceModel.recurAmount = _recurAmountController.text;
+                    // recurrenceModel.recurNote = _recurNoteController.text;
+                    // recurrenceModel.recurCatId = _categories[selectedCategoryIndex].catId;
+                    // recurrenceModel.recurType = _recurTypes.indexOf(recurTypeDropdownValue);
+                    // recurrenceModel.recurOn = generateDate();
                   // _createRecurringTransaction();
                 }
                 Navigator.of(context).pop();
@@ -279,6 +318,8 @@ class _RecurringPageState extends State<RecurringPage> {
   }
 
   dynamic _getYearAndMonthDialog(BuildContext context) {
+    dayYearlyDropdown = dateFormat.format(now);
+    monthYearlyDropdown = monthFormat.format(now);
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -320,7 +361,7 @@ class _RecurringPageState extends State<RecurringPage> {
                         ),
                         contentPadding: const EdgeInsets.all(10.0),
                       ),
-                      value: _choicesMonthly[0],
+                      value: dayYearlyDropdown,
                       items: _choicesMonthly.map((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
@@ -347,7 +388,7 @@ class _RecurringPageState extends State<RecurringPage> {
                         ),
                         contentPadding: const EdgeInsets.all(10.0),
                       ),
-                      value: _choicesMonthNames[0],
+                      value: monthYearlyDropdown,
                       items: _choicesMonthNames.map((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
@@ -370,7 +411,7 @@ class _RecurringPageState extends State<RecurringPage> {
     );
   }
 
-  dynamic _getWidgetBasedOnRecurType(String recurTypeDropdownValue, StateSetter setState) {
+  dynamic _getWidgetBasedOnRecurType(String recurTypeDropdownValue, StateSetter setDialogState) {
     if (recurTypeDropdownValue == 'Daily') {
       _recurTimePickerController.text = '10:00 PM';//TimeOfDay.now().format(context);
       return Expanded(
