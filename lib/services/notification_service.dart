@@ -30,34 +30,36 @@ class NotificationService{
   /// Set right date and time for notifications
   tz.TZDateTime _convertTime(int day, int month, int year, int hour, int minutes) {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduleDate = tz.TZDateTime(
-      tz.local,
-      year,
-      month,
-      day,
-      hour,
-      minutes,
-    );
-
-    // final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     // tz.TZDateTime scheduleDate = tz.TZDateTime(
     //   tz.local,
-    //   now.year,
-    //   now.month,
-    //   now.day,
+    //   year,
+    //   month,
+    //   day,
     //   hour,
     //   minutes,
     // );
+
+    // final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    tz.TZDateTime scheduleDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minutes,
+    );
+    print('scheduled:::: $scheduleDate');
     if (scheduleDate.isBefore(now)) {
       scheduleDate = now.add(const Duration(seconds: 3));
     }
-    
+    print('$now and $scheduleDate');
     return scheduleDate;
   }
 
   Future<void> _configureLocalTimeZone() async {
     tz.initializeTimeZones();
     final String timeZone = await FlutterTimezone.getLocalTimezone();
+    print(timeZone);
     tz.setLocalLocation(tz.getLocation(timeZone));
   }
 

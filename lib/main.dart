@@ -7,12 +7,20 @@ import 'package:finziee_dart/pages/transaction_page.dart';
 import 'package:finziee_dart/services/ThemeServices.dart';
 import 'package:finziee_dart/services/notification_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async{ 
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService().init();
   await GetStorage.init();
+  await Permission.notification.isDenied.then((value) {
+    if (value) {
+      Permission.notification.request();
+    }
+  });
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(const MyApp());
 }
 
