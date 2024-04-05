@@ -37,7 +37,11 @@ class _CategoriesPageState extends State<CategoriesPage> {
       body: ListView.builder(
         itemCount: _categories.length,
         itemBuilder: (context, index) {
-          return _generateItemList(index);
+          if(_categories.isEmpty){
+            return const Center(child: Text('No Categories Found'));
+          }else{
+            return _generateItemList(index);
+          }
         },
       ),
 
@@ -46,15 +50,16 @@ class _CategoriesPageState extends State<CategoriesPage> {
   }
 
   //ui helper functions
-  Card _generateItemList(int index) {
+  Card _generateItemList(int itemIndex) {
+    
     return Card(
           elevation: 20,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          color: Color(int.parse('0xFF${_categories[index].catColor}')),
+          color: Color(int.parse('0xFF${_categories[itemIndex].catColor}')),
           child: InkWell(
             splashColor: Colors.blue[300],
             onTap: () {
-              _createCategoryDialog(context, true, _categories[index]);
+              _createCategoryDialog(context, true, _categories[itemIndex]);
             },
             child: Column(children: [
                     const SizedBox(
@@ -63,18 +68,18 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _getFavoriteIcon(_categories[index]),
+                      _getFavoriteIcon(_categories[itemIndex]),
                       Text(
-                        _categories[index].catName ?? '',
+                        _categories[itemIndex].catName ?? '',
                         style: TextStyle(
                           color: Colour.colorList.entries
-                            .firstWhere((entry) => entry.key == _categories[index].catColor, orElse: () => MapEntry('', 0))
+                            .firstWhere((entry) => entry.key == _categories[itemIndex].catColor, orElse: () => MapEntry('', 0))
                             .value == 1
                             ? Colors.white
                             : Colors.black,
                         ),
                       ),
-                      _getIconBasedOnType(_categories[index].catType??0),
+                      _getIconBasedOnType(_categories[itemIndex].catType??0, itemIndex),
                   ],),
                   const SizedBox(
                     height: 6,
@@ -96,15 +101,18 @@ class _CategoriesPageState extends State<CategoriesPage> {
     }
   }
 
-  Icon _getIconBasedOnType(index){
-    if(index == 0){
-      return Icon(Icons.remove, color: getColorBasedOnType(index));
+  Icon _getIconBasedOnType(catType, index){
+    if(catType == 0){
+      return Icon(Icons.remove, color: _getTextOrIconColorBasedOnCategoryTypeColor(index));
     }else{
-      return Icon(Icons.add, color: getColorBasedOnType(index));
+      return Icon(Icons.add, color: _getTextOrIconColorBasedOnCategoryTypeColor(index));
     }
   }
 
-  dynamic getColorBasedOnType(int index) {
+  Color _getTextOrIconColorBasedOnCategoryTypeColor(int index) {
+    if(index >= _categories.length){
+      return Colors.black45;
+    }
     return Colour.colorList.entries
                 .firstWhere((entry) => entry.key == _categories[index].catColor,
                     orElse: () => MapEntry('', 0))

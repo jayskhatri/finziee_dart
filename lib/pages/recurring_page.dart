@@ -4,7 +4,6 @@ import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/models/recurrence_model.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
 import 'package:finziee_dart/pages/helper/select_category_dialog.dart';
-import 'package:finziee_dart/services/notification_service.dart';
 import 'package:finziee_dart/util/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -18,7 +17,7 @@ class RecurringPage extends StatefulWidget {
 }
 
 class _RecurringPageState extends State<RecurringPage> {
-  List<RecurrenceModel> _recurrences = [];
+  List<RecurrenceModel> _recurringTransactions = [];
   List<CategoryModel> _categories = [];
   final RecurrenceController _recurrenceController = Get.put(RecurrenceController());
   final CategoryController _categoryController = Get.find();
@@ -54,27 +53,67 @@ class _RecurringPageState extends State<RecurringPage> {
         title: const Text('Recurring'),
       ),
       drawer: const DrawerNavigation(),
-      body: ListView.builder(
-          itemCount: 1,
-          itemBuilder: (context, index) {
-            return _generateRecurringItemList(index);
-          }),
+      body: _generateRecurringItemList(),
       floatingActionButton: _createRecurringTransactionButton(context, false),
     );
   }
 
-  Center _generateRecurringItemList(int index) {
-    return Center(child: TextButton(onPressed: (){
-      print('object');
-      NotificationService().scheduledNotification(hour: 0, minutes: 0, id: 222, sound: 'water.mp3');
-    }, child: Text('Recurring Item', style: TextStyle(color: Colors.white, backgroundColor: Colors.blue, fontSize: 20),)));
+  Color _getColorFromCatType(int catId) {
+    if(_categories.isEmpty || catId == -1){
+      return Colors.grey;
+    }
+    return Color(int.parse('0xFF${_categories[_categories.indexWhere((element) => element.catId == catId)].catColor}'));
+  }
+
+  Center _generateRecurringItemList() {
+    if(_recurringTransactions.isEmpty){
+      return const Center(child: Text('No Recurring Transactions Found'));
+    }
+    return Center(
+      child: Column(
+        children: [
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: _recurringTransactions.length,
+            itemBuilder: (context, index) {
+              return Card(
+                elevation: 20,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                color: _getColorFromCatType(_recurringTransactions[index].recurCatId??-1),
+                child: InkWell(
+                  splashColor: Colors.blue[300],
+                  onTap: () {
+                    _generateAddRecurringTransactionDialog(context, true, _recurringTransactions[index]);
+                  },
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: Text(_recurringTransactions[index].recurNote??''),
+                        subtitle: Text(_recurringTransactions[index].recurAmount??''),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            _deleteRecurringTransaction(id: _recurringTransactions[index].recurId??-1);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+    
   }
 
   FloatingActionButton _createRecurringTransactionButton(
       BuildContext context, bool isEdit) {
     return FloatingActionButton(
       onPressed: () {
-        _generateAddRecurringTransactionDialog(context, isEdit);
+        _generateAddRecurringTransactionDialog(context, isEdit, new RecurrenceModel());
       },
       child: const Icon(Icons.add),
     );
@@ -111,21 +150,22 @@ class _RecurringPageState extends State<RecurringPage> {
       return formattedDate + ' ' + time;
   }
 
-  void _generateAddRecurringTransactionDialog(BuildContext context, bool isEdit) {
-    
-    DateTime selectedDate = DateTime.now();
-    _dateController.text = DateFormat('yyyy-MM-dd').format(selectedDate);
-    recurTypeDropdownValue = 'Daily';
-    _recurAmountController.text = '';
-    _recurNoteController.text = '';
-    _selectedCategoryController.text = '';
-    dateDropDown = Constants.dateFormat.format(now);
-    dayYearlyDropdown = Constants.dateFormat.format(now);
-    monthYearlyDropdown = Constants.monthFormat.format(now);
-    selectedCategoryIndex = 0;
-    _recurTimePickerController.text = '10:00 PM';//TimeOfDay.now().format(context);
-    _dayMonthController.text = dayYearlyDropdown + ' ' + monthYearlyDropdown;
+  String getRecurOnValue(){
+    if(recurTypeDropdownValue == 'Daily'){
+      return _recurTimePickerController.text;
+    }else if(recurTypeDropdownValue == 'Weekly'){
+      return dayDropDown;
+    }else if(recurTypeDropdownValue == 'Monthly'){
+      return dateDropDown;
+    }else if(recurTypeDropdownValue == 'Yearly'){
+      return dayYearlyDropdown + ' ' + monthYearlyDropdown;
+    }
+    return '';
+  }
 
+  void _generateAddRecurringTransactionDialog(BuildContext context, bool isEdit, RecurrenceModel recurrenceModel) {
+    DateTime selectedDate = DateTime.now();
+    initializeControllerAndVariables(isEdit, recurrenceModel, selectedDate);
 
     showDialog(
       context: context,
@@ -155,12 +195,16 @@ class _RecurringPageState extends State<RecurringPage> {
                     print('dateDropDown: $dateDropDown');
                     print('dayYearlyDropdown: $dayYearlyDropdown');
                     print('monthYearlyDropdown: $monthYearlyDropdown');
-                  
-                  // _updateRecurringTransaction(RecurrenceModel(
-                  //   recurAmount: _recurAmountController.text,
-                  //   recurNote: _recurNoteController.text,
-                  //   recurCatId: _categories[selectedCategoryIndex].catId,
-                  // ));
+
+                    RecurrenceModel updatedRecurrenceModel = RecurrenceModel();
+                    updatedRecurrenceModel.recurId = _recurringTransactions[selectedCategoryIndex].recurId;
+                    updatedRecurrenceModel.recurAmount = _recurAmountController.text;
+                    updatedRecurrenceModel.recurNote = _recurNoteController.text;
+                    updatedRecurrenceModel.recurCatId = _categories[selectedCategoryIndex].catId;
+                    updatedRecurrenceModel.recurType = Constants.recurTypes.indexOf(recurTypeDropdownValue);
+                    updatedRecurrenceModel.recurOn = getRecurOnValue();
+                    print('recurId: ${updatedRecurrenceModel.recurId}');
+                    _updateRecurringTransaction(updatedRecurrenceModel);
                 } else {
                     print('Data in add mode:');
                     print('_recurAmountController: ${_recurAmountController.text}');
@@ -177,14 +221,16 @@ class _RecurringPageState extends State<RecurringPage> {
                     print('dayYearlyDropdown: $dayYearlyDropdown');
                     print('monthYearlyDropdown: $monthYearlyDropdown');
                     print('getRecurrenceOnDate: ${getRecurrenceOnDate()}');
-                    // RecurrenceModel recurrenceModel = RecurrenceModel();
-                    // recurrenceModel.recurAmount = _recurAmountController.text;
-                    // recurrenceModel.recurNote = _recurNoteController.text;
-                    // recurrenceModel.recurCatId = _categories[selectedCategoryIndex].catId;
-                    // recurrenceModel.recurType = _recurTypes.indexOf(recurTypeDropdownValue);
-                    // recurrenceModel.recurOn = generateDate();
-                  // _createRecurringTransaction();
+                    print('getRecurvalue: ${getRecurOnValue()}');
+                    RecurrenceModel newRecurrenceModel = RecurrenceModel();
+                    newRecurrenceModel.recurAmount = _recurAmountController.text;
+                    newRecurrenceModel.recurNote = _recurNoteController.text;
+                    newRecurrenceModel.recurCatId = _categories[selectedCategoryIndex].catId;
+                    newRecurrenceModel.recurType = Constants.recurTypes.indexOf(recurTypeDropdownValue);
+                    newRecurrenceModel.recurOn = getRecurOnValue();
+                  _createRecurringTransaction(newRecurrenceModel);
                 }
+                resetControllerAndVariables();
                 Navigator.of(context).pop();
               },
               child: Text(isEdit ? 'Update' : 'Add'),
@@ -235,7 +281,7 @@ class _RecurringPageState extends State<RecurringPage> {
                           ),
                           contentPadding: const EdgeInsets.all(10.0),
                         ),
-                        value: Constants.recurTypes[0],
+                        value: recurTypeDropdownValue,
                         items: Constants.recurTypes.map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
@@ -286,6 +332,53 @@ class _RecurringPageState extends State<RecurringPage> {
         });
       },
     );
+  }
+
+  void resetControllerAndVariables() {
+    _recurAmountController.clear();
+    _recurNoteController.clear();
+    _selectedCategoryController.clear();
+    _recurTimePickerController.clear();
+    selectedCategoryIndex = 0;
+    recurTypeDropdownValue = 'Daily';
+    dayDropDown = 'Monday';
+    dateDropDown = '1';
+    dayYearlyDropdown = '1';
+    monthYearlyDropdown = 'January';
+  }
+
+  void initializeControllerAndVariables(bool isEdit, RecurrenceModel recurrenceModel, DateTime selectedDate) {
+    if(isEdit){
+      _recurAmountController.text = recurrenceModel.recurAmount??'';
+      _recurNoteController.text = recurrenceModel.recurNote??'';
+      _selectedCategoryController.text = _categories.firstWhere((category) => category.catId == recurrenceModel.recurCatId).catName ?? '';
+      recurTypeDropdownValue = Constants.recurTypes[recurrenceModel.recurType??0];
+      _recurTimePickerController.text = recurrenceModel.recurOn??'10:00 PM';
+      
+      if(recurTypeDropdownValue == 'Daily'){
+        _recurTimePickerController.text = recurrenceModel.recurOn??'10:00 PM';
+      }else if(recurTypeDropdownValue == 'Weekly'){
+        dayDropDown = recurrenceModel.recurOn??'Monday';
+      }else if(recurTypeDropdownValue == 'Monthly'){
+        dateDropDown = recurrenceModel.recurOn??'1';
+      }else if(recurTypeDropdownValue == 'Yearly'){
+        List<String> dateAndMonth = recurrenceModel.recurOn?.split(' ')??['1', 'January'];
+        dayYearlyDropdown = dateAndMonth[0];
+        monthYearlyDropdown = dateAndMonth[1];
+      }
+    }else{
+      _dateController.text = DateFormat('yyyy-MM-dd').format(selectedDate);
+      recurTypeDropdownValue = 'Daily';
+      _recurAmountController.text = '';
+      _recurNoteController.text = '';
+      _selectedCategoryController.text = '';
+      dateDropDown = Constants.dateFormat.format(now);
+      dayYearlyDropdown = Constants.dateFormat.format(now);
+      monthYearlyDropdown = Constants.monthFormat.format(now);
+      selectedCategoryIndex = 0;
+      _recurTimePickerController.text = '10:00 PM';//TimeOfDay.now().format(context);
+      _dayMonthController.text = dayYearlyDropdown + ' ' + monthYearlyDropdown;
+    }
   }
 
   dynamic _getIconWidget(){
@@ -512,7 +605,7 @@ class _RecurringPageState extends State<RecurringPage> {
   void _getRecurringTransactions() async {
     var recurrences = await _recurrenceController.getRecurringTransactions();
     setState(() {
-      _recurrences = recurrences;
+      _recurringTransactions = recurrences;
     });
   }
 
@@ -525,16 +618,13 @@ class _RecurringPageState extends State<RecurringPage> {
 
   void _updateRecurringTransaction(RecurrenceModel recurringTransaction) async {
     await _recurrenceController.updateRecurringTransaction(
-        recurringTransaction: RecurrenceModel(
-      recurId: recurringTransaction.recurId,
-      recurAmount: _recurAmountController.text,
-    ));
+        recurringTransaction: recurringTransaction);
     _getRecurringTransactions();
   }
 
-  void _createRecurringTransaction() {
+  void _createRecurringTransaction(RecurrenceModel recurrenceModel) {
     _recurrenceController.addRecurringTransaction(
-        recurrence: RecurrenceModel(recurAmount: _recurAmountController.text));
+        recurrence: recurrenceModel);
     _getRecurringTransactions();
   }
 

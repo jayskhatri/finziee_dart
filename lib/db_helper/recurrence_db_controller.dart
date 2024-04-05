@@ -30,6 +30,10 @@ class RecurrenceController {
 
   Future<int> updateRecurringTransaction({RecurrenceModel? recurringTransaction}) async {
     var result = await DBHelper.updateRecurrence(recurringTransaction!);
+    if(result > 0){
+      var index = recurrenceList.indexWhere((element) => element.recurId == recurringTransaction.recurId);
+      recurrenceList[index] = recurringTransaction;
+    }
     return result;
   }
 
