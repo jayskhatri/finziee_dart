@@ -28,16 +28,26 @@ class NotificationService{
   }
 
   /// Set right date and time for notifications
-  tz.TZDateTime _convertTime(int hour, int minutes) {
+  tz.TZDateTime _convertTime(int day, int month, int year, int hour, int minutes) {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     tz.TZDateTime scheduleDate = tz.TZDateTime(
       tz.local,
-      now.year,
-      now.month,
-      now.day,
+      year,
+      month,
+      day,
       hour,
       minutes,
     );
+
+    // final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    // tz.TZDateTime scheduleDate = tz.TZDateTime(
+    //   tz.local,
+    //   now.year,
+    //   now.month,
+    //   now.day,
+    //   hour,
+    //   minutes,
+    // );
     if (scheduleDate.isBefore(now)) {
       scheduleDate = now.add(const Duration(seconds: 3));
     }
@@ -48,7 +58,6 @@ class NotificationService{
   Future<void> _configureLocalTimeZone() async {
     tz.initializeTimeZones();
     final String timeZone = await FlutterTimezone.getLocalTimezone();
-    print('timezone: $timeZone');
     tz.setLocalLocation(tz.getLocation(timeZone));
   }
 
@@ -83,7 +92,7 @@ class NotificationService{
       id,
       'It\'s time to drink water!',
       'After drinking, touch the cup to confirm',
-      _convertTime(hour, minutes),
+      _convertTime(0, 0, 0, hour, minutes),
       NotificationDetails(
         android: AndroidNotificationDetails(
           channelId,
