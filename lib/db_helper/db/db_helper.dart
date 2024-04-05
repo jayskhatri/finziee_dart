@@ -1,4 +1,5 @@
 import 'package:finziee_dart/models/category_model.dart';
+import 'package:finziee_dart/models/transaction_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -41,25 +42,24 @@ class DBHelper {
         String transactionsTableCreationQuery = '''
           CREATE TABLE transactions (
             id INTEGER NOT NULL PRIMARY KEY autoincrement, 
-            comment TEXT,
-            amount TEXT NOT NULL DEFAULT '0', 
-            date DATE NOT NULL, 
+            description TEXT,
+            amount FLOAT NOT NULL DEFAULT '0', 
+            date TEXT NOT NULL, 
             cat_id INTEGER NOT NULL, 
             is_auto_added INTEGER DEFAULT 0, 
-            img_path TEXT, 
             FOREIGN KEY(cat_id) REFERENCES categories(cat_id)
           )
         ''';
-        // await db.execute(transactionsTableCreationQuery);
+        await db.execute(transactionsTableCreationQuery);
       },
     );
   }
 
 
   //TRANSACTIONS TABLE CRUD OPERATIONS
-  static Future<int> insertTransaction(Map<String, dynamic> transaction) async {
+  static Future<int> insertTransaction(TransactionModel transaction) async {
     final db = await database;
-    return await db.insert('transactions', transaction);
+    return await db.insert('transactions', transaction.toJson());
   }
 
   static Future<List<Map<String,dynamic>>> getTransactions() async {
@@ -68,13 +68,13 @@ class DBHelper {
     return maps;
   }
 
-  static Future<int> updateTransaction(Map<String, dynamic> transaction) async {
+  static Future<int> updateTransaction(TransactionModel transaction) async {
     final db = await database;
     return await db.update(
       'transactions',
-      transaction,
+      transaction.toJson(),
       where: 'id = ?',
-      whereArgs: [transaction['id']],
+      whereArgs: [transaction.id],
     );
   }
 
@@ -132,7 +132,7 @@ class DBHelper {
 
   static Future<List<Map<String, dynamic>>> getCategoryById(int id) async {
     final db = await database;
-    return db.query('categories',where: 'id=?',whereArgs: [id],limit: 1);
+    return db.query('categories',where: 'cat_id=?',whereArgs: [id],limit: 1);
   }
 
   static void deleteAllCategories() async {
