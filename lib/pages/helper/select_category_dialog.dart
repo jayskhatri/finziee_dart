@@ -1,6 +1,7 @@
 import 'package:finziee_dart/db_helper/category_db_controller.dart';
 import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/pages/helper/create_category_dialog.dart';
+import 'package:finziee_dart/util/color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -88,8 +89,13 @@ class _SelectCategoryDialogState extends State<SelectCategoryDialog> {
               ),
               leading: Icon(categories[index].catType == 0
                   ? Icons.arrow_downward
-                  : Icons.arrow_upward),
-              title: Text(categories[index].catName.toString()),
+                  : Icons.arrow_upward, color: getColorBasedOnType(index)),
+              title: Text(
+                categories[index].catName.toString(),
+                style: TextStyle(
+                  color: getColorBasedOnType(index),
+                ),
+              ),
               onTap: () {
                 setState(() {
                   selectedCategoryIndex = index;
@@ -104,6 +110,16 @@ class _SelectCategoryDialogState extends State<SelectCategoryDialog> {
         },
       ),
     );
+  }
+
+  dynamic getColorBasedOnType(int index) {
+    return Colour.colorList.entries
+                .firstWhere((entry) => entry.key == categories[index].catColor,
+                    orElse: () => MapEntry('', 0))
+                .value ==
+            1
+        ? Colors.white
+        : Colors.black;
   }
 
 

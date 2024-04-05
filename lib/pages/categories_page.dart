@@ -2,6 +2,7 @@ import 'package:finziee_dart/db_helper/category_db_controller.dart';
 import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/pages/helper/create_category_dialog.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
+import 'package:finziee_dart/util/color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -63,7 +64,16 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _getFavoriteIcon(_categories[index]),
-                      Text(_categories[index].catName??''),
+                      Text(
+                        _categories[index].catName ?? '',
+                        style: TextStyle(
+                          color: Colour.colorList.entries
+                            .firstWhere((entry) => entry.key == _categories[index].catColor, orElse: () => MapEntry('', 0))
+                            .value == 1
+                            ? Colors.white
+                            : Colors.black,
+                        ),
+                      ),
                       _getIconBasedOnType(_categories[index].catType??0),
                   ],),
                   const SizedBox(
@@ -88,10 +98,20 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
   Icon _getIconBasedOnType(index){
     if(index == 0){
-      return const Icon(Icons.remove);
+      return Icon(Icons.remove, color: getColorBasedOnType(index));
     }else{
-      return const Icon(Icons.add);
+      return Icon(Icons.add, color: getColorBasedOnType(index));
     }
+  }
+
+  dynamic getColorBasedOnType(int index) {
+    return Colour.colorList.entries
+                .firstWhere((entry) => entry.key == _categories[index].catColor,
+                    orElse: () => MapEntry('', 0))
+                .value ==
+            1
+        ? Colors.white
+        : Colors.black;
   }
 
   Widget _createCategoryButton(BuildContext context) {

@@ -5,6 +5,7 @@ import 'package:finziee_dart/models/recurrence_model.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
 import 'package:finziee_dart/pages/helper/select_category_dialog.dart';
 import 'package:finziee_dart/services/notification_service.dart';
+import 'package:finziee_dart/util/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -23,11 +24,6 @@ class _RecurringPageState extends State<RecurringPage> {
   final CategoryController _categoryController = Get.find();
 
   DateTime now = DateTime.now();
-  DateFormat dateFormat = DateFormat('d');
-  DateFormat monthFormat = DateFormat('MMMM');
-  DateFormat yearFormat = DateFormat('yyyy');
-  DateFormat dayFormat = DateFormat('EEEE');
-      
 
   final TextEditingController _selectedCategoryController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
@@ -36,36 +32,11 @@ class _RecurringPageState extends State<RecurringPage> {
   final TextEditingController _dayMonthController = TextEditingController();
 
   int selectedCategoryIndex = 0;
-  final List<String> _recurTypes = ["Daily", "Weekly", "Monthly", "Yearly"];
   String recurTypeDropdownValue = 'Daily';
   String dayDropDown = 'Monday';
   String dateDropDown = '1';
   String dayYearlyDropdown = '1';
   String monthYearlyDropdown = 'January';
-  final List<String> _choicesWeekly = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday'
-  ];
-  final List<String> _choicesMonthly = List.generate(28, (index) => (index + 1).toString());
-  final List<String> _choicesMonthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ];
 
   final TextEditingController _recurTimePickerController = TextEditingController();
 
@@ -117,7 +88,7 @@ class _RecurringPageState extends State<RecurringPage> {
       if (recurTypeDropdownValue == 'Daily') {
         generatedDate = DateTime(now.year, now.month, now.day);
       } else if (recurTypeDropdownValue == 'Weekly') {
-        int selectedDayIndex = _choicesWeekly.indexOf(dayDropDown);
+        int selectedDayIndex = Constants.choicesWeekly.indexOf(dayDropDown);
         int daysToAdd = (selectedDayIndex - now.weekday + 7) % 7;
         generatedDate = now.add(Duration(days: (daysToAdd + 1)));
       } else if (recurTypeDropdownValue == 'Monthly') {
@@ -129,7 +100,7 @@ class _RecurringPageState extends State<RecurringPage> {
         }
       } else if (recurTypeDropdownValue == 'Yearly') {
         int selectedDateValue = int.parse(dayYearlyDropdown);
-        int selectedMonthIndex = _choicesMonthNames.indexOf(monthYearlyDropdown);
+        int selectedMonthIndex = Constants.choicesMonthNames.indexOf(monthYearlyDropdown);
         generatedDate = DateTime(now.year, selectedMonthIndex + 1, selectedDateValue);
         if (generatedDate.isBefore(now)) {
           generatedDate = DateTime(now.year + 1, selectedMonthIndex + 1, selectedDateValue);
@@ -148,9 +119,9 @@ class _RecurringPageState extends State<RecurringPage> {
     _recurAmountController.text = '';
     _recurNoteController.text = '';
     _selectedCategoryController.text = '';
-    dateDropDown = dateFormat.format(now);
-    dayYearlyDropdown = dateFormat.format(now);
-    monthYearlyDropdown = monthFormat.format(now);
+    dateDropDown = Constants.dateFormat.format(now);
+    dayYearlyDropdown = Constants.dateFormat.format(now);
+    monthYearlyDropdown = Constants.monthFormat.format(now);
     selectedCategoryIndex = 0;
     _recurTimePickerController.text = '10:00 PM';//TimeOfDay.now().format(context);
     _dayMonthController.text = dayYearlyDropdown + ' ' + monthYearlyDropdown;
@@ -264,8 +235,8 @@ class _RecurringPageState extends State<RecurringPage> {
                           ),
                           contentPadding: const EdgeInsets.all(10.0),
                         ),
-                        value: _recurTypes[0],
-                        items: _recurTypes.map((String value) {
+                        value: Constants.recurTypes[0],
+                        items: Constants.recurTypes.map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Text(value),
@@ -326,8 +297,8 @@ class _RecurringPageState extends State<RecurringPage> {
   }
 
   dynamic _getYearAndMonthDialog(BuildContext context) {
-    dayYearlyDropdown = dateFormat.format(now);
-    monthYearlyDropdown = monthFormat.format(now);
+    dayYearlyDropdown = Constants.dateFormat.format(now);
+    monthYearlyDropdown = Constants.monthFormat.format(now);
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -370,7 +341,7 @@ class _RecurringPageState extends State<RecurringPage> {
                         contentPadding: const EdgeInsets.all(10.0),
                       ),
                       value: dayYearlyDropdown,
-                      items: _choicesMonthly.map((String value) {
+                      items: Constants.choicesMonthly.map((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(value),
@@ -397,7 +368,7 @@ class _RecurringPageState extends State<RecurringPage> {
                         contentPadding: const EdgeInsets.all(10.0),
                       ),
                       value: monthYearlyDropdown,
-                      items: _choicesMonthNames.map((String value) {
+                      items: Constants.choicesMonthNames.map((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(value),
@@ -447,7 +418,7 @@ class _RecurringPageState extends State<RecurringPage> {
         ),
       );
     } else if (recurTypeDropdownValue == 'Weekly') {
-      dayDropDown = dayFormat.format(now);
+      dayDropDown = Constants.dayFormat.format(now);
       return Expanded(
         child: DropdownButtonFormField(
           isExpanded: true,
@@ -459,7 +430,7 @@ class _RecurringPageState extends State<RecurringPage> {
             contentPadding: const EdgeInsets.all(10.0),
           ),
           value: dayDropDown,
-          items: _choicesWeekly.map((String value) {
+          items: Constants.choicesWeekly.map((String value) {
             return DropdownMenuItem<String>(
               value: value,
               child: Text(value),
@@ -475,7 +446,7 @@ class _RecurringPageState extends State<RecurringPage> {
         ),
       );
     } else if (recurTypeDropdownValue == 'Monthly') {
-      dateDropDown = dateFormat.format(now);  
+      dateDropDown = Constants.dateFormat.format(now);  
       return Expanded(
         child: DropdownButtonFormField(
           decoration: InputDecoration(
@@ -486,7 +457,7 @@ class _RecurringPageState extends State<RecurringPage> {
             contentPadding: const EdgeInsets.all(10.0),
           ),
           value: dateDropDown,
-          items: _choicesMonthly.map((String value) {
+          items: Constants.choicesMonthly.map((String value) {
             return DropdownMenuItem<String>(
               value: value,
               child: Text(value),
@@ -500,8 +471,8 @@ class _RecurringPageState extends State<RecurringPage> {
         ),
       );
     } else if (recurTypeDropdownValue == 'Yearly') {
-      dayYearlyDropdown = dateFormat.format(now);
-      monthYearlyDropdown = monthFormat.format(now);
+      dayYearlyDropdown = Constants.dateFormat.format(now);
+      monthYearlyDropdown = Constants.monthFormat.format(now);
       _dayMonthController.text = dayYearlyDropdown + ' ' + monthYearlyDropdown;
       return Expanded(
           child: TextField(

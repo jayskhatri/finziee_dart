@@ -35,13 +35,7 @@ class _CreateCategoryDialogState extends State<CreateCategoryDialog> {
 
   @override
   Widget build(BuildContext context) {
-    
-    _categoryNameController.text = categoryModel.catName??'';
-    _colorIndex = Colour.colorList.keys.toList().indexOf(categoryModel.catColor??'');
-    _isFavorite = categoryModel.catIsFav??false;
-    _isExpense = categoryModel.catType == 0 ? true : false;
-    expense = _isExpense;
-    income = !_isExpense;
+    initializeControllersAndVars();
     
     return StatefulBuilder(
           builder: (context, setState) {
@@ -212,6 +206,24 @@ class _CreateCategoryDialogState extends State<CreateCategoryDialog> {
               ],
             );
           });
+  }
+
+  void initializeControllersAndVars() {
+    if(isEditModeOn){
+        _categoryNameController.text = categoryModel.catName??'';
+        _colorIndex = Colour.colorList.keys.toList().indexOf(categoryModel.catColor??'');
+        _isFavorite = categoryModel.catIsFav??false;
+        _isExpense = categoryModel.catType == 0 ? true : false;
+        expense = _isExpense;
+        income = !_isExpense;
+    }else{
+      _categoryNameController.clear();
+      _colorIndex = 0;
+      _isFavorite = false;
+      _isExpense = true;
+      expense = true;
+      income = false;
+    }
   }
 
   void _updateCategory(CategoryModel categoryModel) async{
