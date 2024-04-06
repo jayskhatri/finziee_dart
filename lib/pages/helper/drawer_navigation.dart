@@ -1,5 +1,3 @@
-import 'package:finziee_dart/pages/categories_page.dart';
-import 'package:finziee_dart/pages/transaction_page.dart';
 import 'package:flutter/material.dart';
 
 class DrawerNavigation extends StatefulWidget {
@@ -29,35 +27,43 @@ class _DrawerNavigationState extends State<DrawerNavigation> {
               ListTile(
                 leading: const Icon(Icons.home),
                 title: const Text('Home'),
-                onTap: (){},
+                onTap: (){
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  Navigator.pushReplacementNamed(context, '/');
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.monetization_on),
                 title: const Text('Transactions'),
                 onTap: (){
-                  Navigator.pop(context);
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const TransactionPage()));
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  Navigator.pushReplacementNamed(context, '/transactions');
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.autorenew_rounded),
                 title: const Text('Recurrings'),
-                onTap: (){},
+                onTap: (){
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  Navigator.pushReplacementNamed(context, '/recurring');
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.category),
                 title: const Text('Categories'),
                 onTap: (){
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/categories');
-                  
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  Navigator.pushReplacementNamed(context, '/categories');
                 },
               ),
               const Divider(color: Colors.black87),
               ListTile(
                 leading: const Icon(Icons.settings),
                 title: const Text('Settings'),
-                onTap: (){},
+                onTap: (){
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/settings');
+                },
               )]
       ),
     ));
