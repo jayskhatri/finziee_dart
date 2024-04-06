@@ -1,5 +1,6 @@
 import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/models/transaction_model.dart';
+import 'package:finziee_dart/models/recurrence_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -51,6 +52,17 @@ class DBHelper {
           )
         ''';
         await db.execute(transactionsTableCreationQuery);
+
+        String recurringTableCreationQuery = '''
+          CREATE TABLE recurrence(
+            recur_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            recur_amount TEXT, 
+            recur_note TEXT, 
+            recur_cat_id INTEGER,
+            recur_type INTEGER, 
+            recur_on TEXT
+          )''';
+        await db.execute(recurringTableCreationQuery);
       },
     );
   }
@@ -138,6 +150,48 @@ class DBHelper {
   static void deleteAllCategories() async {
     final db = await database;
     String query = 'DROP TABLE IF EXISTS categories';
+    await db.execute(query);
+  }
+
+  //RECURRENCE TABLE CRUD OPERATIONS
+  static Future<int> insertRecurrence(RecurrenceModel recurrence) async {
+    final db = await database;
+    return await db.insert('recurrence', recurrence.toJson());
+  }
+
+  static Future<List<Map<String,dynamic>>> getRecurrences() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('recurrence');
+    return maps;
+  }
+
+  static Future<int> updateRecurrence(RecurrenceModel recurrence) async {
+    final db = await database;
+    return await db.update(
+      'recurrence',
+      recurrence.toJson(),
+      where: 'recur_id = ?',
+      whereArgs: [recurrence.recurId],
+    );
+  }
+
+  static Future<int> deleteRecurrence(int id) async {
+    final db = await database;
+    return await db.delete(
+      'recurrence',
+      where: 'recur_id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  static Future<List<Map<String, dynamic>>> getRecurrenceById(int id) async {
+    final db = await database;
+    return db.query('recurrence',where: 'recur_id=?',whereArgs: [id],limit: 1);
+  }
+
+  static void deleteAllRecurrences() async {
+    final db = await database;
+    String query = 'DROP TABLE IF EXISTS recurrence';
     await db.execute(query);
   }
 }

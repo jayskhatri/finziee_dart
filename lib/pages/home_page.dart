@@ -13,6 +13,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final CategoryController categoryController = Get.put(CategoryController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
