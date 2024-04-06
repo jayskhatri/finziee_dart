@@ -52,14 +52,13 @@ class _TransactionPageState extends State<TransactionPage> {
         itemCount: _transactions.length,
         itemBuilder: (BuildContext context, int index) {
           return Card(
-            color: Color(int.parse('0xFF${_categoryColors[index]}')),
+            color: Color(int.parse('0xFF${_getCategoryColor(_transactions[index].catId)}')),
             child: ListTile(
               title: Text(_transactions[index].description.toString()),
               subtitle: Text(_transactions[index].date.toString()),
               trailing: Text(_transactions[index].amount.toString()),
-
               leading: Icon(
-                _transactions[index].catId == 0 ? Icons.arrow_downward : Icons.arrow_upward,
+                _getIconByTransactionById(_transactions[index].catId)
               ),
             ),
           );
@@ -69,6 +68,16 @@ class _TransactionPageState extends State<TransactionPage> {
     );
   }
 
+  _getIconByTransactionById(int? catId){
+    var category = _categories.firstWhere((element) => element.catId == catId);
+    return category.catType == 0 ? Icons.arrow_downward : Icons.arrow_upward;
+  }
+
+  String? _getCategoryColor(int? catId){  
+    var category = _categories.firstWhere((element) => element.catId == catId);
+    return category.catColor;
+  }
+  
   Widget _addTransactionFloatingButton(BuildContext context, bool isEdit){
     return FloatingActionButton(
       onPressed: () {
@@ -89,16 +98,15 @@ class _TransactionPageState extends State<TransactionPage> {
             return AlertDialog(
               title: Text(isEdit ? 'Edit Transaction' : 'Add Transaction'),
               content: SizedBox(
+                height: 225,
                 width: MediaQuery.of(context).size.width*0.6,
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
-
                     TextField(
                       decoration: InputDecoration(
                         labelText: 'Description',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
+                        border: OutlineInputBorder( borderRadius: BorderRadius.circular(20.0)),
                         contentPadding: const EdgeInsets.all(10.0),
                       ),
                       onChanged: (value) {
@@ -107,34 +115,27 @@ class _TransactionPageState extends State<TransactionPage> {
                         });
                       },
                     ),
-
+                    const SizedBox(height: 10.0),
                     TextField(
                       decoration: InputDecoration(
                         labelText: 'Amount',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
+                        border: OutlineInputBorder( borderRadius: BorderRadius.circular(20.0)),
                         contentPadding: const EdgeInsets.all(10.0),
                       ),
                       keyboardType: TextInputType.numberWithOptions(decimal: true),
                       onChanged: (value) {
                         setState(() {
                           _amount = double.parse(value);
-                          print("Amount: ");
-                          print(_amount);
                         });
                       },
-                      // onTap: () => await showCalculator(context: this.context) ?? 0.00;
                     ),
-
+                    const SizedBox(height: 10.0),
                     TextField(
                       readOnly: true,
                       controller: controller_date,
                       decoration: InputDecoration(
                         labelText: 'Date',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0)),
                         contentPadding: const EdgeInsets.all(10.0),
                       ),
                       onTap: () async {
@@ -154,7 +155,7 @@ class _TransactionPageState extends State<TransactionPage> {
                         });
                       },
                     ),
-
+                    const SizedBox(height: 10.0),
                     TextField(
                       readOnly: true,
                       controller: controller_category,
@@ -164,42 +165,35 @@ class _TransactionPageState extends State<TransactionPage> {
                           color: Color(int.parse('0xFF${_mySelectedCat.catColor}')),
                         ),
                         labelText: 'Select Category',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0)),
                         contentPadding: const EdgeInsets.all(10.0),
                       ),
                       onTap: () => _dialogBox(context, setState),
                     ),
-                    //  _getIconWidget(),
                   ],
                 ), 
               ),
               actions: <Widget>[
                     TextButton(
+                      child: const Text('Cancel'),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: const Text('Cancel'),
                     ),
-                    TextButton(child: Text('Create'),
-                    onPressed: (){
-                      _createTransaction();
-                    }
-                  )
-                      
+                    TextButton(
+                      child: Text('Create'),
+                      onPressed: (){
+                        _createTransaction();
+                        Navigator.of(context).pop();
+                      }
+                    )
                   ],
-                  
             );
           }
         );
       },
     );
   }
-
-  // dynamic _getIconWidget(){ 
-  //   return Icon(Icons.circle, color: Color(int.parse('0xFF${_mySelectedCat.catColor}')));
-  // }
 
   dynamic _dialogBox(BuildContext context, StateSetter setState){
     return showDialog(
@@ -252,27 +246,12 @@ class _TransactionPageState extends State<TransactionPage> {
   }
   void _getAllTransactions(context, StateSetter setStage) async{
     var transactions = await _transactionController.getTransactions();
-    var categoryColors = _getCategoryColors(transactions);
     setState(() {
       _transactions = transactions;
-      _categoryColors = categoryColors;
     });
   }
 
-  List<String?> _getCategoryColors(List<TransactionModel> transactions){
-    List<String?> colors = [];
-    for (var transaction in transactions) {
-      var category = _categoryController.getCategoryById(transaction.catId);
-      category.then((value) {
-        colors.add(value.catColor);
-        print(value.catColor);
-    }, onError: (error) {
-      print("Error: $error");
-    });
-    }
-    
-    return colors;
-  }
+  
   void _createTransaction() {
     _transactionController.addTransaction(
       transaction: TransactionModel(
