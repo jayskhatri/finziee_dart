@@ -269,8 +269,7 @@ class _RecurringPageState extends State<RecurringPage> {
                 ),
                 const SizedBox(
                   height: 10.0,
-                ),
-            
+                ),          
                 Row(
                   children: [
                     Expanded(
