@@ -73,12 +73,7 @@ class NotificationService{
 
   tz.TZDateTime _nextInstanceOfSetTime(TimeOfDay timeOfDay, {int dayOffset = 0}) {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    // tz.TZDateTime scheduledDate = tz.TZDateTime(
-    //     tz.local, now.year, now.month, now.day, timeOfDay.hour, timeOfDay.minute);
-    // if (scheduledDate.isBefore(now)) {
-    //   scheduledDate = scheduledDate.add(const Duration(days: 1));
-    // }
-
+  
     // add one to current day (if app wasn't opened, it will notify)
     tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month,
         now.day + dayOffset, timeOfDay.hour, timeOfDay.minute);
@@ -156,16 +151,6 @@ class NotificationService{
   /// Set right date and time for notifications
   tz.TZDateTime _convertTime(int day, int month, int year, int hour, int minutes) {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    // tz.TZDateTime scheduleDate = tz.TZDateTime(
-    //   tz.local,
-    //   year,
-    //   month,
-    //   day,
-    //   hour,
-    //   minutes,
-    // );
-
-    // final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     tz.TZDateTime scheduleDate = tz.TZDateTime(
       tz.local,
       now.year,

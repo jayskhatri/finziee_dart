@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:finziee_dart/db_helper/category_db_controller.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
 import 'package:finziee_dart/services/notification_service.dart';

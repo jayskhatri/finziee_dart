@@ -3,7 +3,6 @@ import 'package:finziee_dart/pages/components/selectable_button.dart';
 import 'package:finziee_dart/util/color.dart';
 import 'package:flutter/material.dart';
 import 'package:finziee_dart/models/category_model.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 class CreateCategoryDialog extends StatefulWidget {
