@@ -34,6 +34,12 @@ class CategoryController{
     return result;
   }
 
+  Future<CategoryModel> getCategoryById(int? id) async {
+    List<Map<String,dynamic>> category = await DBHelper.getCategoryById(id!);
+    particularCategory = CategoryModel.fromJson(category[0]);
+    return particularCategory;
+  }
+
   //delete full table
   void deleteAllCategories() async {
     DBHelper.deleteAllCategories();

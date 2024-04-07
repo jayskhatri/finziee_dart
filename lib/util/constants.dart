@@ -1,3 +1,5 @@
+import 'package:finziee_dart/models/category_model.dart';
+import 'package:finziee_dart/util/color.dart';
 import 'package:intl/intl.dart';
 
 class Constants{
@@ -34,6 +36,18 @@ class Constants{
   static final DateFormat monthFormat = DateFormat('MMMM');
   static final DateFormat yearFormat = DateFormat('yyyy');
   static final DateFormat dayFormat = DateFormat('EEEE');
+
+
+  static final List<CategoryModel> initialCategories = [
+      CategoryModel(catName: 'Food', catType: 0, catColor: Colour.colorList.keys.elementAt(0), catIsFav: false),
+      CategoryModel(catName: 'Travel', catType: 0, catColor: Colour.colorList.keys.elementAt(1), catIsFav: false),
+      CategoryModel(catName: 'Shopping', catType: 0, catColor: Colour.colorList.keys.elementAt(2), catIsFav: false),
+      CategoryModel(catName: 'Health', catType: 0, catColor: Colour.colorList.keys.elementAt(3), catIsFav: false),
+      CategoryModel(catName: 'Entertainment', catType: 0, catColor: Colour.colorList.keys.elementAt(4), catIsFav: false),
+      CategoryModel(catName: 'Education', catType: 0, catColor: Colour.colorList.keys.elementAt(5), catIsFav: false),
+      CategoryModel(catName: 'Salary', catType: 1, catColor: Colour.colorList.keys.elementAt(6), catIsFav: false),
+      CategoryModel(catName: 'Other', catType: 0, catColor: Colour.colorList.keys.elementAt(7), catIsFav: false),
+    ];
 
 
 }

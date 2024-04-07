@@ -3,6 +3,7 @@ import 'package:finziee_dart/pages/components/selectable_button.dart';
 import 'package:finziee_dart/util/color.dart';
 import 'package:flutter/material.dart';
 import 'package:finziee_dart/models/category_model.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 class CreateCategoryDialog extends StatefulWidget {
@@ -47,12 +48,15 @@ class _CreateCategoryDialogState extends State<CreateCategoryDialog> {
                         },
                         icon: const Icon(Icons.close),
                       ),
-                      IconButton(
-                        onPressed: () {
-                          _deleteCategory(id: widget.categoryModel.catId??-1);
-                          Navigator.of(context).pop();
-                        },
-                        icon: const Icon(Icons.delete),
+                      Visibility(
+                        visible: widget.isEditModeOn,
+                        child: IconButton(
+                          onPressed: () {
+                            _deleteCategory(id: widget.categoryModel.catId??-1);
+                            Navigator.of(context).pop();
+                          },
+                          icon: const Icon(Icons.delete),
+                        ),
                       ),
                     ],
                   ),
