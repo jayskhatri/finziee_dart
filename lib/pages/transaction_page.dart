@@ -1,14 +1,10 @@
-import 'dart:ffi';
-
 import 'package:finziee_dart/db_helper/category_db_controller.dart';
 import 'package:finziee_dart/db_helper/transaction_db_controller.dart';
 import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/models/transaction_model.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
 import 'package:finziee_dart/pages/helper/select_category_dialog.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -55,27 +51,31 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   Widget _getTransactionsList(){
-    return ListView.builder(
-      itemCount: _transactions.length,
-      itemBuilder: (context, index) {
-        return Card(
-          child: Column(children: [
-            ListTile(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              tileColor: _getColorByTransactionId(_transactions[index].catId),
-              leading: Icon(_getIconByTransactionById(_transactions[index].catId)),
-              title: Text(_transactions[index].description??''),
-              subtitle: Text(_transactions[index].amount.toString()),
-              trailing: Text(_transactions[index].date??DateTime.now().toString()),
-              onTap: (){
-                _createTransactionDialog(context, true, _transactions[index]);
-              }
-            ),
-          ],
-        ),
-        );
-      },
-    );
+    if(_transactions.isEmpty){
+      return const Center(child: Text('No Transactions'));
+    }else{
+      return ListView.builder(
+        itemCount: _transactions.length,
+        itemBuilder: (context, index) {
+          return Card(
+            child: Column(children: [
+              ListTile(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                tileColor: _getColorByTransactionId(_transactions[index].catId),
+                leading: Icon(_getIconByTransactionById(_transactions[index].catId)),
+                title: Text(_transactions[index].description??''),
+                subtitle: Text(_transactions[index].amount.toString()),
+                trailing: Text(_transactions[index].date??DateTime.now().toString()),
+                onTap: (){
+                  _createTransactionDialog(context, true, _transactions[index]);
+                }
+              ),
+            ],
+          ),
+          );
+        },
+      );
+    }
   }
  
   Widget _addTransactionFloatingButton(BuildContext context, bool isEdit){

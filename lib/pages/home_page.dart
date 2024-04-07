@@ -28,7 +28,7 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await Navigator.push(context, MaterialPageRoute(builder: (context) => const TransactionPage()));
+          await Navigator.pushNamed(context,'/transactions');
         },
         child: const Icon(Icons.add),
       ),
