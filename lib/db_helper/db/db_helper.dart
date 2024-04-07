@@ -1,6 +1,7 @@
 import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/models/transaction_model.dart';
 import 'package:finziee_dart/models/recurrence_model.dart';
+import 'package:finziee_dart/util/constants.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -41,7 +42,7 @@ class DBHelper {
         await db.execute(categoriesTableCreationQuery);
 
         String transactionsTableCreationQuery = '''
-          CREATE TABLE transactions (
+          CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER NOT NULL PRIMARY KEY autoincrement, 
             description TEXT,
             amount FLOAT NOT NULL DEFAULT '0', 
@@ -54,7 +55,7 @@ class DBHelper {
         await db.execute(transactionsTableCreationQuery);
 
         String recurringTableCreationQuery = '''
-          CREATE TABLE recurrence(
+          CREATE TABLE IF NOT EXISTS recurrence(
             recur_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
             recur_amount TEXT, 
             recur_note TEXT, 
@@ -63,6 +64,11 @@ class DBHelper {
             recur_on TEXT
           )''';
         await db.execute(recurringTableCreationQuery);
+
+        for(CategoryModel category in Constants.initialCategories){
+          print(category);
+          await db.insert('categories', category.toJson());
+        }
       },
     );
   }

@@ -111,18 +111,26 @@ class _TransactionPageState extends State<TransactionPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Row(
-                     children: [
-                      Text(isEdit? "Edit Transaction" : "Add Transaction"),
-                      const SizedBox(width: 90.0,),
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        icon: const Icon(Icons.close),
+                      ),
                       Visibility(
-                            visible: isEdit,
-                            child: IconButton(
-                              onPressed: () => _deleteTransaction(transactionModel.id??0),
-                              icon: const Icon(Icons.delete),
-                            )
-                        )
+                        visible: isEdit,
+                        child: IconButton(
+                          onPressed: () {
+                            _deleteTransaction(transactionModel.id??0);
+                            Navigator.of(context).pop();
+                          },
+                          icon: const Icon(Icons.delete),
+                        ),
+                      ),
                     ],
-                    ),
+                  ),
                     const SizedBox(height: 10.0),
                     TextField(
                       controller: _descriptionController,
