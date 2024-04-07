@@ -1,6 +1,5 @@
 import 'package:finziee_dart/db_helper/category_db_controller.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
-import 'package:finziee_dart/pages/transaction_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

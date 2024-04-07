@@ -1,4 +1,8 @@
+import 'package:finziee_dart/main.dart';
+import 'package:finziee_dart/pages/transaction_page.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -9,8 +13,32 @@ class NotificationService{
   static const String channelName = 'Finziee';
   static const String channelDescription = 'Finziee';
 
+  final _storage = GetStorage();
+  final _key = 'isNotificationsAllowed';
+  final _notificationHrKey = 'notificationHr';
+  final _notificationMinKey = 'notificationMin';
+
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+
+  String? notificationPayload;
+
+  _saveNotificationSettingsToStorage(bool isNotificationsAllowed, {TimeOfDay time = const TimeOfDay(hour: 20, minute: 0)}) {
+    _storage.write(_key, isNotificationsAllowed);
+    _storage.write(_notificationHrKey, time.hour);
+    _storage.write(_notificationMinKey, time.minute);
+  }
+  
+  bool _loadNotificationAllowedFromStorage() => _storage.read(_key)??false;
+
+  int _loadNotificationHrFromStorage()=> _storage.read(_notificationHrKey)??20;
+
+  int _loadNotificationMinFromStorage() =>  _storage.read(_notificationMinKey)??0;
+  
+
+  bool get notificationAllowed => _loadNotificationAllowedFromStorage();
+  int get notificationHr => _loadNotificationHrFromStorage();
+  int get notificationMin => _loadNotificationMinFromStorage();
 
   /// Initialize notification
   init() async {
@@ -25,6 +53,107 @@ class NotificationService{
       android: initializationSettingsAndroid,
     );
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  onSelectNotification(NotificationResponse notificationResponse) async {
+    String? payloadData = notificationResponse.payload;
+    notificationPayload = payloadData;
+    runNotificationPayLoadsNoContext(payloadData);
+  }
+
+  runNotificationPayLoadsNoContext(payloadData) {
+    if (payloadData == "addTransaction") {
+      navigatorKey.currentState!.push(
+        MaterialPageRoute(
+          builder: (context) => TransactionPage(),
+        ),
+      );
+    } else {
+      print('No payload');
+    }
+    notificationPayload = "";
+  }
+
+  tz.TZDateTime _nextInstanceOfSetTime(TimeOfDay timeOfDay, {int dayOffset = 0}) {
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    // tz.TZDateTime scheduledDate = tz.TZDateTime(
+    //     tz.local, now.year, now.month, now.day, timeOfDay.hour, timeOfDay.minute);
+    // if (scheduledDate.isBefore(now)) {
+    //   scheduledDate = scheduledDate.add(const Duration(days: 1));
+    // }
+
+    // add one to current day (if app wasn't opened, it will notify)
+    tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month,
+        now.day + dayOffset, timeOfDay.hour, timeOfDay.minute);
+
+    return scheduledDate;
+  }
+
+  Future<bool> scheduleDailyNotification(TimeOfDay timeOfDay, {bool scheduleNowDebug = false}) async {
+    // If the app was opened on the day the notification was scheduled it will be
+    // cancelled and set to the next day because of _nextInstanceOfSetTime
+    // If ReminderNotificationType.Everyday is not true
+    await cancelDailyNotification();
+
+    AndroidNotificationDetails androidNotificationDetails =
+        AndroidNotificationDetails(
+      'transactionReminders',
+      'Transaction Reminders',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+
+    DarwinNotificationDetails darwinNotificationDetails =
+        DarwinNotificationDetails(threadIdentifier: 'transactionReminders');
+
+    // schedule 2 weeks worth of notifications
+    for (int i = 0; i <= 14; i++) {
+      String chosenMessage = "Don't forget to add transactions from today!";
+      tz.TZDateTime dateTime = _nextInstanceOfSetTime(timeOfDay, dayOffset: i);
+      if (scheduleNowDebug){
+        dateTime = tz.TZDateTime.now(tz.local).add(Duration(seconds: i * 5));
+      }
+      NotificationDetails notificationDetails = NotificationDetails(
+        android: androidNotificationDetails,
+        iOS: darwinNotificationDetails,
+      );
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        i,
+        'Add Transaction',
+        chosenMessage,
+        dateTime,
+        notificationDetails,
+        androidAllowWhileIdle: true,
+        payload: 'addTransaction',
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.dateAndTime,
+
+        // If exact time was used, need USE_EXACT_ALARM and SCHEDULE_EXACT_ALARM permissions
+        // which are only meant for calendar/reminder based applications
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      );
+      print("Notification " +
+          chosenMessage +
+          " scheduled for " +
+          dateTime.toString() +
+          " with id " +
+          i.toString());
+    }
+
+    // final List<PendingNotificationRequest> pendingNotificationRequests =
+    //     await flutterLocalNotificationsPlugin.pendingNotificationRequests();
+
+    return true;
+  }
+
+  Future<bool> cancelDailyNotification() async {
+    // Need to cancel all, including the one at 0 - even if it does not exist
+    for (int i = 0; i <= 14; i++) {
+      await flutterLocalNotificationsPlugin.cancel(i);
+    }
+    print("Cancelled notifications for daily reminder");
+    return true;
   }
 
   /// Set right date and time for notifications
@@ -121,6 +250,18 @@ class NotificationService{
           badge: true,
           sound: true,
         );
+  }
+
+  void turnOffNotifications(bool isNotificationAllowed) async {
+    print('isNotificationAllowed: $isNotificationAllowed');
+    await cancelDailyNotification();
+    _saveNotificationSettingsToStorage(!isNotificationAllowed);
+  }
+
+  void turnOnNotifications(bool isNotificationAllowed, TimeOfDay chosenTime) async {
+    print('isNotificationAllowed: $isNotificationAllowed');
+    await scheduleDailyNotification(chosenTime);
+    _saveNotificationSettingsToStorage(isNotificationAllowed, time: chosenTime);
   }
 
   cancelAll() async => await flutterLocalNotificationsPlugin.cancelAll();
