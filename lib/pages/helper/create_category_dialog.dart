@@ -3,27 +3,20 @@ import 'package:finziee_dart/pages/components/selectable_button.dart';
 import 'package:finziee_dart/util/color.dart';
 import 'package:flutter/material.dart';
 import 'package:finziee_dart/models/category_model.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 class CreateCategoryDialog extends StatefulWidget {
   final bool isEditModeOn;
   final CategoryModel categoryModel;
   final Function setStateInCallingPage;
-  final List<CategoryModel> categories;
-  const CreateCategoryDialog({super.key, required this.isEditModeOn, required this.categoryModel, required this.setStateInCallingPage, required this.categories});
+  List<CategoryModel> categories;
+  CreateCategoryDialog({super.key, required this.isEditModeOn, required this.categoryModel, required this.setStateInCallingPage, required this.categories});
 
   @override
-  State<CreateCategoryDialog> createState() => _CreateCategoryDialogState(isEditModeOn: isEditModeOn, categoryModel: categoryModel, setStateInCallingPage: setStateInCallingPage, categories: categories);
+  State<CreateCategoryDialog> createState() => _CreateCategoryDialogState();
 }
 
 class _CreateCategoryDialogState extends State<CreateCategoryDialog> {
-
-  bool isEditModeOn;
-  CategoryModel categoryModel;
-  Function setStateInCallingPage;
-  List<CategoryModel> categories;
-  _CreateCategoryDialogState({required this.isEditModeOn, required this.categoryModel, required this.setStateInCallingPage, required this.categories});
 
   final TextEditingController _categoryNameController = TextEditingController();
   int _colorIndex = 0;
@@ -58,7 +51,7 @@ class _CreateCategoryDialogState extends State<CreateCategoryDialog> {
                         visible: widget.isEditModeOn,
                         child: IconButton(
                           onPressed: () {
-                            _deleteCategory(id: categoryModel.catId??-1);
+                            _deleteCategory(id: widget.categoryModel.catId??-1);
                             Navigator.of(context).pop();
                           },
                           icon: const Icon(Icons.delete),
@@ -192,8 +185,8 @@ class _CreateCategoryDialogState extends State<CreateCategoryDialog> {
                 ),
                 TextButton(
                   onPressed: () {
-                    if(isEditModeOn){
-                      _updateCategory(categoryModel);
+                    if(widget.isEditModeOn){
+                      _updateCategory(widget.categoryModel);
                     }else{
                       _createCategory();
                     }
@@ -204,7 +197,7 @@ class _CreateCategoryDialogState extends State<CreateCategoryDialog> {
                     _isExpense = true;
                     Navigator.of(context).pop();
                   },
-                  child: Text(isEditModeOn ? 'Update' : 'Create'),
+                  child: Text(widget.isEditModeOn ? 'Update' : 'Create'),
                 ),
               ],
             );
@@ -212,11 +205,11 @@ class _CreateCategoryDialogState extends State<CreateCategoryDialog> {
   }
 
   void initializeControllersAndVars() {
-    if(isEditModeOn){
-        _categoryNameController.text = categoryModel.catName??'';
-        _colorIndex = Colour.colorList.keys.toList().indexOf(categoryModel.catColor??'');
-        _isFavorite = categoryModel.catIsFav??false;
-        _isExpense = categoryModel.catType == 0 ? true : false;
+    if(widget.isEditModeOn){
+        _categoryNameController.text = widget.categoryModel.catName??'';
+        _colorIndex = Colour.colorList.keys.toList().indexOf(widget.categoryModel.catColor??'');
+        _isFavorite = widget.categoryModel.catIsFav??false;
+        _isExpense = widget.categoryModel.catType == 0 ? true : false;
         expense = _isExpense;
         income = !_isExpense;
     }else{
@@ -232,9 +225,9 @@ class _CreateCategoryDialogState extends State<CreateCategoryDialog> {
   void _updateCategory(CategoryModel categoryModel) async{
     await _categoryController.updateCategory(
       category: CategoryModel(
-        catId: categoryModel.catId,
+        catId: widget.categoryModel.catId,
         catName: _categoryNameController.text,
-        catCount: categoryModel.catCount,
+        catCount: widget.categoryModel.catCount,
         catColor: Colour.colorList.keys.elementAt(_colorIndex),
         catIsFav: _isFavorite,
         catType: _isExpense ? 0 : 1,
@@ -268,8 +261,8 @@ class _CreateCategoryDialogState extends State<CreateCategoryDialog> {
 
   void _getAllCategories() async{
     var catagory = await _categoryController.getCategories();
-    setStateInCallingPage(() {
-      categories = catagory;
+    widget.setStateInCallingPage(() {
+      widget.categories = catagory;
     });
   }
 }

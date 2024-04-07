@@ -11,6 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async{ 
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService().init();
@@ -32,6 +34,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
           debugShowCheckedModeBanner: false,
           initialRoute: '/',
+          navigatorKey: navigatorKey,
           theme: Themes.light,
           darkTheme: Themes.dark,
           themeMode: ThemeServices().theme,
@@ -39,7 +42,7 @@ class MyApp extends StatelessWidget {
             '/': (context) => const HomePage(),
             '/transactions':(context) =>  const TransactionPage(),
             '/categories':(context) =>  const CategoriesPage(),
-            '/settings' :(context) => const SettigsPage(),
+            '/settings' :(context) => const SettingsPage(),
             '/recurring':(context) => const RecurringPage(),
           },
       );

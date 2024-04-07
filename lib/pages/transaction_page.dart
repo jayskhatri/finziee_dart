@@ -34,6 +34,7 @@ class _TransactionPageState extends State<TransactionPage> {
   void initState() {
     _getAllCategories();
     _getAllTransactions();
+    super.initState();
   }
 
   @override

@@ -1,6 +1,6 @@
 import 'package:finziee_dart/db_helper/category_db_controller.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
-import 'package:finziee_dart/pages/transaction_page.dart';
+import 'package:finziee_dart/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,6 +13,17 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final CategoryController categoryController = Get.put(CategoryController());
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if(NotificationService().notificationAllowed){
+      TimeOfDay notificationTiming = NotificationService().notificationTime;
+      NotificationService().turnOnNotifications(true, notificationTiming);
+      print('Generated notifications for the next 14 days');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
