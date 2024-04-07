@@ -1,38 +1,34 @@
+import 'dart:ffi';
+
 class TransactionModel{
   int? id;
-  String? comment;
-  String? amount;
+  String? description;
+  double? amount;
   String? date;
-  int? accId;
   int? catId;
   int? isAutoAdded;
-  String? imgPath;
 
-  TransactionModel({this.id, this.comment, this.amount, this.date, this.accId, this.catId, this.isAutoAdded, this.imgPath});
+  TransactionModel({this.id, this.description, this.amount, this.date, this.catId, this.isAutoAdded});
 
   factory TransactionModel.fromJson(Map<String, dynamic> json){
     return TransactionModel(
       id: json['id'],
-      comment: json['comment'],
+      description: json['description'],
       amount: json['amount'],
       date: json['date'],
-      accId: json['acc_id'],
       catId: json['cat_id'],
       isAutoAdded: json['is_auto_added'],
-      imgPath: json['img_path']
     );
   }
 
   Map<String, dynamic> toJson(){
     return {
       'id': id,
-      'comment': comment,
+      'description': description,
       'amount': amount,
       'date': date,
-      'acc_id': accId,
       'cat_id': catId,
-      'is_auto_added': isAutoAdded,
-      'img_path': imgPath
+      'is_auto_added': isAutoAdded
     };
   }
 }

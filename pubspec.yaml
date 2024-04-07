@@ -30,6 +30,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # flutter_calculator:
+  #   git:
+  #     url: git://github.com/flytreeleft/flutter_calculator.git
+  #     # Use the developing version
+  #     ref: master
+  #     # or use the release version
+  #     #ref: v0.1.0
 
 
   # The following adds the Cupertino Icons font to your application.
