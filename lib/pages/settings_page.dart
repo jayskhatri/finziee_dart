@@ -1,5 +1,6 @@
 import 'package:finziee_dart/services/ThemeServices.dart';
 import 'package:finziee_dart/services/notification_service.dart';
+import 'package:finziee_dart/util/value_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,9 +14,15 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool notificationAllowed = NotificationService().notificationAllowed;
   TextEditingController _notificationTimeController = TextEditingController();
-  String time = NotificationService().notificationHr.toString() + ":" + NotificationService().notificationMin.toString();
-  
+  final ValueHelper valueHelper = ValueHelper();
 
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+     _notificationTimeController.text = valueHelper.getFormattedTimeIn12Hr(NotificationService().notificationTime);
+    print('time---------> ${_notificationTimeController.text}');
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,12 +33,6 @@ class _SettingsPageState extends State<SettingsPage> {
         leading: GestureDetector(
           onTap: () {
             ThemeServices().switchTheme();
-            print('clicked');
-            // NotificationCreationMethod.raiseSimpleNotification(
-            //     title: "Changed theme",
-            //     body: Get.isDarkMode
-            //         ? "Light Theme Activated"
-            //         : "Dark Theme Activated");
           },
           child: Icon(
             Get.isDarkMode ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
@@ -52,6 +53,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 if(notificationAllowed){
                   NotificationService().turnOnNotifications(true, TimeOfDay(hour: 20, minute: 0));
                 }else{
+                  _notificationTimeController.text = valueHelper.getFormattedTimeIn12Hr(TimeOfDay(hour: 20, minute: 0));
                   NotificationService().turnOffNotifications(false);
                 }
               },
@@ -65,7 +67,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 onPressed: () async {
                   TimeOfDay? pickedTime = await showTimePicker(
                     context: context,
-                    initialTime: TimeOfDay(hour: NotificationService().notificationHr, minute: NotificationService().notificationMin),
+                    initialTime: NotificationService().notificationTime,
                   );
                   if (pickedTime != null) {
                     if(notificationAllowed){

@@ -1,5 +1,6 @@
 import 'package:finziee_dart/main.dart';
 import 'package:finziee_dart/pages/transaction_page.dart';
+import 'package:finziee_dart/util/value_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_storage/get_storage.dart';
@@ -15,8 +16,8 @@ class NotificationService{
 
   final _storage = GetStorage();
   final _key = 'isNotificationsAllowed';
-  final _notificationHrKey = 'notificationHr';
-  final _notificationMinKey = 'notificationMin';
+  final _notificationTime = 'notificationTime';
+  final ValueHelper valueHelper = ValueHelper();
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -25,20 +26,16 @@ class NotificationService{
 
   _saveNotificationSettingsToStorage(bool isNotificationsAllowed, {TimeOfDay time = const TimeOfDay(hour: 20, minute: 0)}) {
     _storage.write(_key, isNotificationsAllowed);
-    _storage.write(_notificationHrKey, time.hour);
-    _storage.write(_notificationMinKey, time.minute);
+    _storage.write(_notificationTime, valueHelper.getFormattedTimeIn12Hr(time));
   }
   
   bool _loadNotificationAllowedFromStorage() => _storage.read(_key)??false;
 
-  int _loadNotificationHrFromStorage()=> _storage.read(_notificationHrKey)??20;
-
-  int _loadNotificationMinFromStorage() =>  _storage.read(_notificationMinKey)??0;
+  TimeOfDay _loadNotificationTimeFromStorage()=> valueHelper.getTimeOfDayFromString(_storage.read(_notificationTime)??"8:00 PM");
   
 
   bool get notificationAllowed => _loadNotificationAllowedFromStorage();
-  int get notificationHr => _loadNotificationHrFromStorage();
-  int get notificationMin => _loadNotificationMinFromStorage();
+  TimeOfDay get notificationTime => _loadNotificationTimeFromStorage();
 
   /// Initialize notification
   init() async {
@@ -253,13 +250,13 @@ class NotificationService{
   }
 
   void turnOffNotifications(bool isNotificationAllowed) async {
-    print('isNotificationAllowed: $isNotificationAllowed');
+    print('notification turned off with bool val: $isNotificationAllowed');
     await cancelDailyNotification();
-    _saveNotificationSettingsToStorage(!isNotificationAllowed);
+    _saveNotificationSettingsToStorage(isNotificationAllowed);
   }
 
   void turnOnNotifications(bool isNotificationAllowed, TimeOfDay chosenTime) async {
-    print('isNotificationAllowed: $isNotificationAllowed');
+    print('notification turned on with bool val: $isNotificationAllowed');
     await scheduleDailyNotification(chosenTime);
     _saveNotificationSettingsToStorage(isNotificationAllowed, time: chosenTime);
   }
