@@ -5,6 +5,7 @@ import 'package:finziee_dart/models/recurrence_model.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
 import 'package:finziee_dart/pages/helper/select_category_dialog.dart';
 import 'package:finziee_dart/util/constants.dart';
+import 'package:finziee_dart/util/value_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -19,7 +20,7 @@ class RecurringPage extends StatefulWidget {
 class _RecurringPageState extends State<RecurringPage> {
   List<RecurrenceModel> _recurringTransactions = [];
   List<CategoryModel> _categories = [];
-  final RecurrenceController _recurrenceController = Get.put(RecurrenceController());
+  final RecurrenceController _recurrenceController = Get.find();
   final CategoryController _categoryController = Get.find();
 
   DateTime now = DateTime.now();
@@ -129,7 +130,7 @@ class _RecurringPageState extends State<RecurringPage> {
       } else if (recurTypeDropdownValue == 'Weekly') {
         int selectedDayIndex = Constants.choicesWeekly.indexOf(dayDropDown);
         int daysToAdd = (selectedDayIndex - now.weekday + 7) % 7;
-        generatedDate = now.add(Duration(days: (daysToAdd + 1)));
+        generatedDate = now.add(Duration(days: (daysToAdd)));
       } else if (recurTypeDropdownValue == 'Monthly') {
         int selectedDateValue = int.parse(dateDropDown);
         if (selectedDateValue < now.day) {
@@ -145,9 +146,8 @@ class _RecurringPageState extends State<RecurringPage> {
           generatedDate = DateTime(now.year + 1, selectedMonthIndex + 1, selectedDateValue);
         }
       }
-
-      String formattedDate = DateFormat('yyyy-MM-dd').format(generatedDate);
-      return formattedDate + ' ' + time;
+      generatedDate = generatedDate.add(Duration(hours: 7));
+      return generatedDate.toIso8601String();
   }
 
   String getRecurOnValue(){
@@ -166,7 +166,6 @@ class _RecurringPageState extends State<RecurringPage> {
   void _generateAddRecurringTransactionDialog(BuildContext context, bool isEdit, RecurrenceModel recurrenceModel) {
     DateTime selectedDate = DateTime.now();
     initializeControllerAndVariables(isEdit, recurrenceModel, selectedDate);
-    print('recurId----> ${recurrenceModel.recurId}');
 
     showDialog(
       context: context,
@@ -203,7 +202,9 @@ class _RecurringPageState extends State<RecurringPage> {
                     updatedRecurrenceModel.recurNote = _recurNoteController.text;
                     updatedRecurrenceModel.recurCatId = _categories[selectedCategoryIndex].catId;
                     updatedRecurrenceModel.recurType = Constants.recurTypes.indexOf(recurTypeDropdownValue);
-                    updatedRecurrenceModel.recurOn = getRecurOnValue();
+                    updatedRecurrenceModel.recurOnLabel = getRecurOnValue();
+                    updatedRecurrenceModel.recurOn = getRecurrenceOnDate();
+                    updatedRecurrenceModel.recurShown = false;
                     print('recurId: ${updatedRecurrenceModel.recurId}');
                     _updateRecurringTransaction(updatedRecurrenceModel);
                 } else {
@@ -228,7 +229,10 @@ class _RecurringPageState extends State<RecurringPage> {
                     newRecurrenceModel.recurNote = _recurNoteController.text;
                     newRecurrenceModel.recurCatId = _categories[selectedCategoryIndex].catId;
                     newRecurrenceModel.recurType = Constants.recurTypes.indexOf(recurTypeDropdownValue);
-                    newRecurrenceModel.recurOn = getRecurOnValue();
+                    newRecurrenceModel.recurOnLabel = getRecurOnValue();
+                    newRecurrenceModel.recurOn = getRecurrenceOnDate();
+                    newRecurrenceModel.recurShown = false;
+                    print('next to next recurOn: ${ValueHelper().getNextRecurringDate(newRecurrenceModel)}');
                   _createRecurringTransaction(newRecurrenceModel);
                 }
                 resetControllerAndVariables();
@@ -354,16 +358,16 @@ class _RecurringPageState extends State<RecurringPage> {
       _recurNoteController.text = recurrenceModel.recurNote??'';
       _selectedCategoryController.text = _categories[selectedCategoryIndex].catName ?? '';
       recurTypeDropdownValue = Constants.recurTypes[recurrenceModel.recurType??0];
-      _recurTimePickerController.text = recurrenceModel.recurOn??'10:00 PM';
+      _recurTimePickerController.text = recurrenceModel.recurOnLabel??'10:00 PM';
       
       if(recurTypeDropdownValue == 'Daily'){
-        _recurTimePickerController.text = recurrenceModel.recurOn??'10:00 PM';
+        _recurTimePickerController.text = recurrenceModel.recurOnLabel??'10:00 PM';
       }else if(recurTypeDropdownValue == 'Weekly'){
-        dayDropDown = recurrenceModel.recurOn??'Monday';
+        dayDropDown = recurrenceModel.recurOnLabel??'Monday';
       }else if(recurTypeDropdownValue == 'Monthly'){
-        dateDropDown = recurrenceModel.recurOn??now.day.toString();
+        dateDropDown = recurrenceModel.recurOnLabel??now.day.toString();
       }else if(recurTypeDropdownValue == 'Yearly'){
-        List<String> dateAndMonth = recurrenceModel.recurOn?.split(' ')??['1', 'January'];
+        List<String> dateAndMonth = recurrenceModel.recurOnLabel?.split(' ')??['1', 'January'];
         dayYearlyDropdown = dateAndMonth[0];
         monthYearlyDropdown = dateAndMonth[1];
         print(dayYearlyDropdown + ' ' + monthYearlyDropdown);

@@ -33,6 +33,7 @@ class Constants{
   ];
 
   static final DateFormat dateFormat = DateFormat('d');
+  static final DateFormat showDateOnlyFormat = DateFormat('dd-MM-yyyy');
   static final DateFormat monthFormat = DateFormat('MMMM');
   static final DateFormat yearFormat = DateFormat('yyyy');
   static final DateFormat dayFormat = DateFormat('EEEE');
