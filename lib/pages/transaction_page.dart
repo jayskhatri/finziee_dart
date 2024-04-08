@@ -4,6 +4,7 @@ import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/models/transaction_model.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
 import 'package:finziee_dart/pages/helper/select_category_dialog.dart';
+import 'package:finziee_dart/util/color.dart';
 import 'package:finziee_dart/util/constants.dart';
 import 'package:finziee_dart/util/value_helper.dart';
 import 'package:flutter/material.dart';
@@ -65,10 +66,21 @@ class _TransactionPageState extends State<TransactionPage> {
               ListTile(
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 tileColor: _getColorByTransactionId(_transactions[index].catId, 0),
-                leading: Icon(_getIconByTransactionById(_transactions[index].catId)),
-                title: Text(_transactions[index].description??''),
-                subtitle: Text(_transactions[index].amount.toString()),
-                trailing: Text(_getDateToShow(_transactions[index].date??DateTime.now().toIso8601String())),
+                leading: Icon(_getIconByTransactionById(_transactions[index].catId), color: _getTextOrIconColorBasedOnCategoryTypeColor(_transactions[index].catId??-1),),
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(getCategoryNameFromCatId(_transactions[index].catId??-1), style: TextStyle(fontWeight: FontWeight.w800, color: _getTextOrIconColorBasedOnCategoryTypeColor(_transactions[index].catId??-1))),
+                  ],
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(_transactions[index].description??'', style: TextStyle(color: _getTextOrIconColorBasedOnCategoryTypeColor(_transactions[index].catId??-1))),
+                    Text(_getDateToShow(_transactions[index].date??DateTime.now().toIso8601String()), style: TextStyle(color: _getTextOrIconColorBasedOnCategoryTypeColor(_transactions[index].catId??-1)))
+                  ],
+                ),
+                trailing: Text(_transactions[index].amount.toString(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: _getTextOrIconColorBasedOnCategoryTypeColor(_transactions[index].catId??-1)),),
                 onTap: (){
                   _createTransactionDialog(context, true, _transactions[index]);
                 }
@@ -340,5 +352,27 @@ class _TransactionPageState extends State<TransactionPage> {
       )
     );
     _getAllTransactions();
+  }
+
+  String getCategoryNameFromCatId(int catId){
+    if(catId == -1) return 'Other Expenses';
+    return _categories.firstWhere((element) => element.catId == catId).catName??'Other Expenses';
+  }
+
+  
+
+  Color _getTextOrIconColorBasedOnCategoryTypeColor(int catId) {
+    var index = _categories.indexWhere((element) => element.catId == catId);
+
+    if(index >= _categories.length || catId == -1){
+      return Colors.black45;
+    }
+    return Colour.colorList.entries
+                .firstWhere((entry) => entry.key == _categories[index].catColor,
+                    orElse: () => MapEntry('', 0))
+                .value ==
+            1
+        ? Colors.white
+        : Colors.black;
   }
 }
