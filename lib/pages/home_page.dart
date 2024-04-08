@@ -18,6 +18,17 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final CategoryController _categoryController = Get.put(CategoryController());
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if(NotificationService().notificationAllowed){
+      TimeOfDay notificationTiming = NotificationService().notificationTime;
+      NotificationService().turnOnNotifications(true, notificationTiming);
+      print('Generated notifications for the next 14 days');
+    }
+  }
   final RecurrenceController _recurrenceController = Get.put(RecurrenceController());
   final TransactionController _transactionController = Get.put(TransactionController());
   final List<RecurrenceModel> _recurrences = [];
