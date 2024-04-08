@@ -28,22 +28,12 @@ class _HomePageState extends State<HomePage> {
       NotificationService().turnOnNotifications(true, notificationTiming);
       print('Generated notifications for the next 14 days');
     }
+    getUpcomingRecurrences();
   }
+
   final RecurrenceController _recurrenceController = Get.put(RecurrenceController());
   final TransactionController _transactionController = Get.put(TransactionController());
   final List<RecurrenceModel> _recurrences = [];
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    if(NotificationService().notificationAllowed){
-      TimeOfDay notificationTiming = NotificationService().notificationTime;
-      NotificationService().turnOnNotifications(true, notificationTiming);
-      print('Generated notifications for the next 14 days');
-    }
-    getUpcomingRecurrences();
-  }
 
   @override
   Widget build(BuildContext context) {
