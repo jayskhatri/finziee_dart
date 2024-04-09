@@ -61,7 +61,9 @@ class DBHelper {
             recur_note TEXT, 
             recur_cat_id INTEGER,
             recur_type INTEGER, 
-            recur_on TEXT
+            recur_on_label TEXT,
+            recur_on TEXT,
+            recur_shown BOOL DEFAULT 0
           )''';
         await db.execute(recurringTableCreationQuery);
 
@@ -200,4 +202,14 @@ class DBHelper {
     String query = 'DROP TABLE IF EXISTS recurrence';
     await db.execute(query);
   }
+
+  static Future<List<Map<String,dynamic>>> getUpcomingRecurrentTransactions(DateTime startdate, DateTime endDate) async {
+    final db = await database;
+    return db.query('recurrence',where: 'recur_on BETWEEN ? AND ? AND recur_shown = ?',whereArgs: [startdate.toIso8601String(),endDate.toIso8601String(), false]);
+  }
+
+  /** 
+   * SQL QUERY IN RAW FORM 
+   * SELECT * from recurrence where recur_on BETWEEN '2021-09-01T00:00:00.000' AND '2021-09-30T00:00:00.000' AND recur_shown = 0;
+  */
 }

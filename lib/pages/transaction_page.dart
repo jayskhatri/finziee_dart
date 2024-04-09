@@ -4,6 +4,9 @@ import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/models/transaction_model.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
 import 'package:finziee_dart/pages/helper/select_category_dialog.dart';
+import 'package:finziee_dart/util/color.dart';
+import 'package:finziee_dart/util/constants.dart';
+import 'package:finziee_dart/util/value_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -22,7 +25,7 @@ class _TransactionPageState extends State<TransactionPage> {
   List<TransactionModel> _transactions = [];
 
   final CategoryController _categoryController = Get.find();
-  final TransactionController _transactionController = Get.put(TransactionController());
+  final TransactionController _transactionController = Get.find();
   final TextEditingController _selectedCategoryController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -59,24 +62,50 @@ class _TransactionPageState extends State<TransactionPage> {
         itemCount: _transactions.length,
         itemBuilder: (context, index) {
           return Card(
-            child: Column(children: [
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
               ListTile(
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                tileColor: _getColorByTransactionId(_transactions[index].catId),
-                leading: Icon(_getIconByTransactionById(_transactions[index].catId)),
-                title: Text(_transactions[index].description??''),
-                subtitle: Text(_transactions[index].amount.toString()),
-                trailing: Text(_transactions[index].date??DateTime.now().toString()),
+                tileColor: _getColorByTransactionId(_transactions[index].catId, 0),
+                leading: Icon(_getIconByTransactionById(_transactions[index].catId), color: _getTextOrIconColorBasedOnCategoryTypeColor(_transactions[index].catId??-1),),
+                title: Text(getCategoryNameFromCatId(_transactions[index].catId??-1), style: TextStyle(fontWeight: FontWeight.w800, color: _getTextOrIconColorBasedOnCategoryTypeColor(_transactions[index].catId??-1))),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(_transactions[index].description??'', style: TextStyle(color: _getTextOrIconColorBasedOnCategoryTypeColor(_transactions[index].catId??-1))),
+                    Text(_getDateToShow(_transactions[index].date??DateTime.now().toIso8601String()), style: TextStyle(color: _getTextOrIconColorBasedOnCategoryTypeColor(_transactions[index].catId??-1)))
+                  ],
+                ),
+                trailing: Text(_transactions[index].amount.toString(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: _getTextOrIconColorBasedOnCategoryTypeColor(_transactions[index].catId??-1)),),
                 onTap: (){
                   _createTransactionDialog(context, true, _transactions[index]);
                 }
               ),
+              Visibility(
+                visible: _transactions[index].isAutoAdded == 1,
+                child: ListTile(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  leading: Icon(Icons.autorenew_rounded),
+                  tileColor: _getColorByTransactionId(_transactions[index].catId, 1),
+                  title: Text('Auto added by recurring', style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic, color: Colors.black54),),
+                  dense: true,
+                  visualDensity: VisualDensity(vertical: -4),
+                  onTap: (){
+                    _createTransactionDialog(context, true, _transactions[index]);
+                  }
+                ),
+              )
             ],
           ),
           );
         },
       );
     }
+  }
+
+  String _getDateToShow(String date){
+    return Constants.showDateOnlyFormat.format(ValueHelper().getDateFromISOString(date));
   }
  
   Widget _addTransactionFloatingButton(BuildContext context, bool isEdit){
@@ -93,9 +122,9 @@ class _TransactionPageState extends State<TransactionPage> {
     return category.catType == 0 ? Icons.arrow_downward : Icons.arrow_upward;
   }
 
-  _getColorByTransactionId(int? catId){
+  Color _getColorByTransactionId(int? catId, int isAutoAdded){
      var category = _categories.firstWhere((element) => element.catId == catId);
-     return Color(int.parse('0xFF${category.catColor}'));
+     return Color(int.parse('0xFF${category.catColor}')).withOpacity(isAutoAdded == 1 ? 0.5 : 1.0);
   }  
   
   void _createTransactionDialog(BuildContext context, bool isEdit, TransactionModel transactionModel) {
@@ -270,7 +299,7 @@ class _TransactionPageState extends State<TransactionPage> {
       _amountController.text = transactionModel.amount.toString();
       selectedCategoryIndex = _categories.indexWhere((category) => category.catId == transactionModel.catId);
       _selectedCategoryController.text = _categories[selectedCategoryIndex].catName??'';
-      _dateController.text = transactionModel.date??DateFormat('yyyy-MM-dd').format(DateTime.now());
+      _dateController.text = _getDateToShow(transactionModel.date??DateTime.now().toIso8601String());
     }else{
       _descriptionController.text = '';
       _amountController.text = '';
@@ -320,5 +349,25 @@ class _TransactionPageState extends State<TransactionPage> {
       )
     );
     _getAllTransactions();
+  }
+
+  String getCategoryNameFromCatId(int catId){
+    if(catId == -1) return 'Other Expenses';
+    return _categories.firstWhere((element) => element.catId == catId).catName??'Other Expenses';
+  }
+
+  Color _getTextOrIconColorBasedOnCategoryTypeColor(int catId) {
+    var index = _categories.indexWhere((element) => element.catId == catId);
+
+    if(index >= _categories.length || catId == -1){
+      return Colors.black45;
+    }
+    return Colour.colorList.entries
+                .firstWhere((entry) => entry.key == _categories[index].catColor,
+                    orElse: () => MapEntry('', 0))
+                .value ==
+            1
+        ? Colors.white
+        : Colors.black;
   }
 }
