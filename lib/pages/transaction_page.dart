@@ -62,17 +62,14 @@ class _TransactionPageState extends State<TransactionPage> {
         itemCount: _transactions.length,
         itemBuilder: (context, index) {
           return Card(
-            child: Column(children: [
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
               ListTile(
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 tileColor: _getColorByTransactionId(_transactions[index].catId, 0),
                 leading: Icon(_getIconByTransactionById(_transactions[index].catId), color: _getTextOrIconColorBasedOnCategoryTypeColor(_transactions[index].catId??-1),),
-                title: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(getCategoryNameFromCatId(_transactions[index].catId??-1), style: TextStyle(fontWeight: FontWeight.w800, color: _getTextOrIconColorBasedOnCategoryTypeColor(_transactions[index].catId??-1))),
-                  ],
-                ),
+                title: Text(getCategoryNameFromCatId(_transactions[index].catId??-1), style: TextStyle(fontWeight: FontWeight.w800, color: _getTextOrIconColorBasedOnCategoryTypeColor(_transactions[index].catId??-1))),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -358,8 +355,6 @@ class _TransactionPageState extends State<TransactionPage> {
     if(catId == -1) return 'Other Expenses';
     return _categories.firstWhere((element) => element.catId == catId).catName??'Other Expenses';
   }
-
-  
 
   Color _getTextOrIconColorBasedOnCategoryTypeColor(int catId) {
     var index = _categories.indexWhere((element) => element.catId == catId);
