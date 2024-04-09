@@ -1,3 +1,4 @@
+import 'package:auto_animated/auto_animated.dart';
 import 'package:finziee_dart/db_helper/category_db_controller.dart';
 import 'package:finziee_dart/db_helper/recurrence_db_controller.dart';
 import 'package:finziee_dart/models/category_model.dart';
@@ -74,11 +75,33 @@ class _RecurringPageState extends State<RecurringPage> {
     if (_recurringTransactions.isEmpty) {
       return const Center(child: Text('No Recurring Transactions Found'));
     }
-    return ListView.builder(
+    return LiveList.options(
       shrinkWrap: true,
       itemCount: _recurringTransactions.length,
-      itemBuilder: (context, index) {
-        return Card(
+      itemBuilder: buildAnimatedItem,
+      options: options,
+    );
+  }
+
+  Widget buildAnimatedItem(
+    BuildContext context,
+    int index,
+    Animation<double> animation,
+  ) =>
+    // For example wrap with fade transition
+    FadeTransition(
+      opacity: Tween<double>(
+        begin: 0,
+        end: 1,
+      ).animate(animation),
+      // And slide transition
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: Offset(0, -0.1),
+          end: Offset.zero,
+        ).animate(animation),
+        // Paste you Widget
+        child: Card(
           child: InkWell(
             splashColor: _getColorFromCatType(
                     _recurringTransactions[index].recurCatId ?? -1)
@@ -148,10 +171,9 @@ class _RecurringPageState extends State<RecurringPage> {
               ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
-  }
 
   _getIconByTransactionById(int? catId) {
     var category = _categories.firstWhere((element) => element.catId == catId);
@@ -789,4 +811,26 @@ class _RecurringPageState extends State<RecurringPage> {
     await _recurrenceController.deleteRecurringTransaction(id);
     _getRecurringTransactions();
   }
+
+
+  //ANIMATIONS RELATED
+  final options = LiveOptions(
+    // Start animation after (default zero)
+    delay: Duration(seconds: 0),
+
+    // Show each item through (default 250)
+    showItemInterval: Duration(milliseconds: 100),
+
+    // Animation duration (default 250)
+    showItemDuration: Duration(seconds: 1),
+
+    // Animations starts at 0.05 visible
+    // item fraction in sight (default 0.025)
+    visibleFraction: 0.05,
+
+    // Repeat the animation of the appearance 
+    // when scrolling in the opposite direction (default false)
+    // To get the effect as in a showcase for ListView, set true
+    reAnimateOnVisibility: false,
+  );
 }
