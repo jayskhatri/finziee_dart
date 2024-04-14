@@ -33,7 +33,6 @@ class NotificationService{
 
   TimeOfDay _loadNotificationTimeFromStorage()=> valueHelper.getTimeOfDayFromString(_storage.read(_notificationTime)??"8:00 PM");
   
-
   bool get notificationAllowed => _loadNotificationAllowedFromStorage();
   TimeOfDay get notificationTime => _loadNotificationTimeFromStorage();
 

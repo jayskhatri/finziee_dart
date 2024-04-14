@@ -1,8 +1,8 @@
-import 'package:finziee_dart/services/ThemeServices.dart';
-import 'package:finziee_dart/services/notification_service.dart';
+import 'package:finziee_dart/services/shared_pref.dart';
 import 'package:finziee_dart/util/value_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -12,17 +12,19 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool notificationAllowed = NotificationService().notificationAllowed;
-  TextEditingController _notificationTimeController = TextEditingController();
+
+  bool notificationAllowed = SharedPref().notificationAllowed;
+  final TextEditingController _notificationTimeController = TextEditingController();
   final ValueHelper valueHelper = ValueHelper();
+  bool cFAllowed = SharedPref().cfAllowed;
+ 
 
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
-     _notificationTimeController.text = valueHelper.getFormattedTimeIn12Hr(NotificationService().notificationTime);
-    print('time---------> ${_notificationTimeController.text}');
+     _notificationTimeController.text = valueHelper.getFormattedTimeIn12Hr(SharedPref().notificationTime);
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +34,7 @@ class _SettingsPageState extends State<SettingsPage> {
         elevation: 0.0,
         leading: GestureDetector(
           onTap: () {
-            ThemeServices().switchTheme();
+            SharedPref().switchTheme();
           },
           child: Icon(
             Get.isDarkMode ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
@@ -51,10 +53,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   notificationAllowed = value;
                 });
                 if(notificationAllowed){
-                  NotificationService().turnOnNotifications(true, TimeOfDay(hour: 20, minute: 0));
+                  SharedPref().turnOnNotifications(true, TimeOfDay(hour: 20, minute: 0));
                 }else{
                   _notificationTimeController.text = valueHelper.getFormattedTimeIn12Hr(TimeOfDay(hour: 20, minute: 0));
-                  NotificationService().turnOffNotifications(false);
+                  SharedPref().turnOffNotifications(false);
                 }
               },
             ),
@@ -67,11 +69,11 @@ class _SettingsPageState extends State<SettingsPage> {
                 onPressed: () async {
                   TimeOfDay? pickedTime = await showTimePicker(
                     context: context,
-                    initialTime: NotificationService().notificationTime,
+                    initialTime: SharedPref().notificationTime,
                   );
                   if (pickedTime != null) {
                     if(notificationAllowed){
-                      NotificationService().turnOnNotifications(true, pickedTime);
+                      SharedPref().turnOnNotifications(true, pickedTime);
                     }
                     setState(() {
                       _notificationTimeController.text = pickedTime.format(context);
@@ -80,6 +82,19 @@ class _SettingsPageState extends State<SettingsPage> {
                 },
                 child: Text(_notificationTimeController.text),
               ),
+            ),
+          ),
+
+          ListTile(
+            title: const Text('Allow Carry Forward'),
+            trailing: Switch(
+              value: cFAllowed, // Replace with your variable to control the switch
+              onChanged: (value) {
+                setState(() {
+                  cFAllowed = value;
+                });
+                SharedPref().toggleCFAllowedFlag();
+              },
             ),
           ),
         ],
