@@ -1,5 +1,6 @@
 import 'package:finziee_dart/services/settings_provider.dart';
 import 'package:finziee_dart/services/shared_pref.dart';
+import 'package:finziee_dart/util/constants.dart';
 import 'package:finziee_dart/util/value_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,6 +20,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final TextEditingController _notificationTimeController = TextEditingController();
   final ValueHelper valueHelper = ValueHelper();
   bool cFAllowed = false;
+  String dropdownCurrency = "₹";
 
   @override
   void didChangeDependencies() {
@@ -107,6 +109,31 @@ class _SettingsPageState extends State<SettingsPage> {
                   });
                   print('CF Allowed: $cFAllowed');
                   settingsProvider.isCFAllowed = cFAllowed;
+                },
+              ),
+            ),
+
+            Expanded(
+              child: DropdownButtonFormField(
+                decoration: InputDecoration(
+                  labelText: 'Currency',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  contentPadding: const EdgeInsets.all(10.0),
+                ),
+                value: settingsProvider.currencySymbol,
+                items: Constants.currenciesSymbol.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? value) {
+                  setState(() {
+                    dropdownCurrency = value ?? "₹";
+                  });
+                  settingsProvider.currencySymbol = dropdownCurrency;
                 },
               ),
             ),

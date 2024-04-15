@@ -6,17 +6,20 @@ class SettingsProvider extends ChangeNotifier{
   late bool? _isNotificationAllowed;
   late bool? _isCFAllowed;
   late TimeOfDay? _notificationTime;
+  late String? _currencySymbol;
   late FinzieeSharedPref _sharedPref;
   bool get isDarkMode => _isDarkMode??false;
   bool get isNotificationAllowed => _isNotificationAllowed??true;
   bool get isCFAllowed => _isCFAllowed??false;
   TimeOfDay get notificationTime => _notificationTime??TimeOfDay(hour: 20, minute: 0);
+  String get currencySymbol => _currencySymbol??"₹";
 
   SettingsProvider(){
     _isDarkMode = false;
     _isNotificationAllowed = true;
     _isCFAllowed = false;
     _notificationTime = TimeOfDay(hour: 20, minute: 0);
+    _currencySymbol = "₹";
     _sharedPref = FinzieeSharedPref();
     getPreferences();
   }
@@ -46,10 +49,17 @@ class SettingsProvider extends ChangeNotifier{
     notifyListeners();
   }
 
+  set currencySymbol(String value) {
+    _currencySymbol = value;
+     _sharedPref.setCurrencySymbol(value);
+    notifyListeners();
+  }
+
   getPreferences() async {
     _isDarkMode = await _sharedPref.getDarkTheme();
     // _isNotificationAllowed = await _sharedPref.getNotificationAllowed();
     _isCFAllowed = await _sharedPref.getCFAllowed();
+    _currencySymbol = await _sharedPref.getCurrencySymbol();
     // _notificationTime = ValueHelper().getTimeOfDayFromString(await _sharedPref.getNotificationTime());
     notifyListeners();
   }

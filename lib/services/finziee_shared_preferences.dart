@@ -4,6 +4,7 @@ class FinzieeSharedPref{
   static const String DARKMODE = "DARKMODE";
   static const String ISFIRSTTIME = "ISFIRSTTIME";
   static const String ISCFALLOWED = "ISCFALLOWED";
+  static const String CURRENCYSYMBOL = "CURRENCYSYMBOL";
 
 
   setDarkTheme(bool value) async {
@@ -34,5 +35,15 @@ class FinzieeSharedPref{
   getCFAllowed() async{
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     return sharedPreferences.getBool(ISCFALLOWED);
+  }
+
+  setCurrencySymbol(String value) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setString(CURRENCYSYMBOL, value);
+  }
+
+  getCurrencySymbol() async{
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences.getString(CURRENCYSYMBOL);
   }
 }
