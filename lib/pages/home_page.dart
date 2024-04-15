@@ -4,7 +4,8 @@ import 'package:finziee_dart/db_helper/transaction_db_controller.dart';
 import 'package:finziee_dart/models/recurrence_model.dart';
 import 'package:finziee_dart/models/transaction_model.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
-import 'package:finziee_dart/services/notification_service.dart';
+import 'package:finziee_dart/services/settings_provider.dart';
+import 'package:finziee_dart/services/shared_pref.dart';
 import 'package:finziee_dart/util/value_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -18,22 +19,21 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final CategoryController _categoryController = Get.put(CategoryController());
+  final SettingsProvider _settingsProvider = Get.put(SettingsProvider());
+  final RecurrenceController _recurrenceController = Get.put(RecurrenceController());
+  final TransactionController _transactionController = Get.put(TransactionController());
+  final List<RecurrenceModel> _recurrences = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    if(NotificationService().notificationAllowed){
-      TimeOfDay notificationTiming = NotificationService().notificationTime;
-      NotificationService().turnOnNotifications(true, notificationTiming);
-      print('Generated notifications for the next 14 days');
+    if(SharedPref().notificationAllowed){
+      TimeOfDay notificationTiming = SharedPref().notificationTime;
+      SharedPref().turnOnNotifications(true, notificationTiming);
     }
     getUpcomingRecurrences();
   }
-
-  final RecurrenceController _recurrenceController = Get.put(RecurrenceController());
-  final TransactionController _transactionController = Get.put(TransactionController());
-  final List<RecurrenceModel> _recurrences = [];
 
   @override
   Widget build(BuildContext context) {
