@@ -5,6 +5,7 @@ import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/models/recurrence_model.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
 import 'package:finziee_dart/pages/helper/select_category_dialog.dart';
+import 'package:finziee_dart/services/settings_provider.dart';
 import 'package:finziee_dart/util/color.dart';
 import 'package:finziee_dart/util/constants.dart';
 import 'package:finziee_dart/util/value_helper.dart';
@@ -24,11 +25,11 @@ class _RecurringPageState extends State<RecurringPage> {
   List<CategoryModel> _categories = [];
   final RecurrenceController _recurrenceController = Get.find();
   final CategoryController _categoryController = Get.find();
+  final SettingsProvider settingsProvider = Get.find();
 
   DateTime now = DateTime.now();
 
-  final TextEditingController _selectedCategoryController =
-      TextEditingController();
+  final TextEditingController _selectedCategoryController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _recurAmountController = TextEditingController();
   final TextEditingController _recurNoteController = TextEditingController();
@@ -40,6 +41,7 @@ class _RecurringPageState extends State<RecurringPage> {
   String dateDropDown = '1';
   String dayYearlyDropdown = '1';
   String monthYearlyDropdown = 'January';
+  String currencySymbol = '₹';
 
   final TextEditingController _recurTimePickerController =
       TextEditingController();
@@ -49,6 +51,13 @@ class _RecurringPageState extends State<RecurringPage> {
     super.initState();
     _getRecurringTransactions();
     _getCategories();
+  }
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    currencySymbol = settingsProvider.currencySymbol;
   }
 
   @override
@@ -132,7 +141,7 @@ class _RecurringPageState extends State<RecurringPage> {
                                       _recurringTransactions[index]
                                               .recurCatId ??
                                           -1))),
-                      Text(_recurringTransactions[index].recurAmount ?? '',
+                      Text('$currencySymbol ${_recurringTransactions[index].recurAmount}' ?? '₹',
                           style: TextStyle(
                               color:
                                   _getTextOrIconColorBasedOnCategoryTypeColor(

@@ -4,14 +4,13 @@ import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/models/transaction_model.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
 import 'package:finziee_dart/pages/helper/select_category_dialog.dart';
+import 'package:finziee_dart/services/settings_provider.dart';
 import 'package:finziee_dart/util/color.dart';
 import 'package:finziee_dart/util/constants.dart';
 import 'package:finziee_dart/util/value_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-
-// import 'package:flutter_calculator/flutter_calculator.dart';
 
 class TransactionPage extends StatefulWidget {
   const TransactionPage({super.key});
@@ -30,14 +29,23 @@ class _TransactionPageState extends State<TransactionPage> {
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
+  final SettingsProvider settingsProvider = Get.find();
 
   int selectedCategoryIndex = 0;
+  String currencySymbol = '₹';
 
   @override
   void initState() {
     _getAllCategories();
     _getAllTransactions();
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    currencySymbol = settingsProvider.currencySymbol;
   }
 
   @override
@@ -77,7 +85,7 @@ class _TransactionPageState extends State<TransactionPage> {
                     Text(_getDateToShow(_transactions[index].date??DateTime.now().toIso8601String()), style: TextStyle(color: _getTextOrIconColorBasedOnCategoryTypeColor(_transactions[index].catId??-1)))
                   ],
                 ),
-                trailing: Text(_transactions[index].amount.toString(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: _getTextOrIconColorBasedOnCategoryTypeColor(_transactions[index].catId??-1)),),
+                trailing: Text('$currencySymbol ${_transactions[index].amount}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: _getTextOrIconColorBasedOnCategoryTypeColor(_transactions[index].catId??-1)),),
                 onTap: (){
                   _createTransactionDialog(context, true, _transactions[index]);
                 }
