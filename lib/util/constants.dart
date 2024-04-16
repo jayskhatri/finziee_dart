@@ -50,5 +50,19 @@ class Constants{
       CategoryModel(catName: 'Other', catType: 0, catColor: Colour.colorList.keys.elementAt(7), catIsFav: false),
     ];
 
+  static final List<String> currenciesSymbol = [
+    "₹",
+    "\$",
+    "€",
+    "£",
+    "¥",
+    "₽",
+    "₺",
+    "₩",
+    "₴",
+    "₸",
+    "₮",
+  ];
+
 
 }
