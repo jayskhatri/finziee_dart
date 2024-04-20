@@ -33,6 +33,7 @@ class Constants{
   ];
 
   static final DateFormat dateFormat = DateFormat('d');
+  static final DateFormat showDateOnlyFormat = DateFormat('dd-MM-yyyy');
   static final DateFormat monthFormat = DateFormat('MMMM');
   static final DateFormat yearFormat = DateFormat('yyyy');
   static final DateFormat dayFormat = DateFormat('EEEE');
@@ -48,6 +49,20 @@ class Constants{
       CategoryModel(catName: 'Salary', catType: 1, catColor: Colour.colorList.keys.elementAt(6), catIsFav: false),
       CategoryModel(catName: 'Other', catType: 0, catColor: Colour.colorList.keys.elementAt(7), catIsFav: false),
     ];
+
+  static final List<String> currenciesSymbol = [
+    "₹",
+    "\$",
+    "€",
+    "£",
+    "¥",
+    "₽",
+    "₺",
+    "₩",
+    "₴",
+    "₸",
+    "₮",
+  ];
 
 
 }

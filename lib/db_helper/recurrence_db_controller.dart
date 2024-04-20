@@ -47,4 +47,14 @@ class RecurrenceController {
     return await DBHelper.deleteRecurrence(id!);
   }
 
+  //get recurrent transactions
+  Future<List<RecurrenceModel>> getUpcomingRecurrentTransactions(DateTime startDate, DateTime endDate) async {
+    List<Map<String,dynamic>> recurrences = await DBHelper.getUpcomingRecurrentTransactions(startDate, endDate);
+    recurrenceList.assignAll(recurrences.map((data) =>  RecurrenceModel.fromJson(data)).toList());
+    if(kDebugMode){
+      print('Total fetched recurring transaction: ${recurrenceList.length}');
+    }
+    return recurrenceList;
+  }
+
 }

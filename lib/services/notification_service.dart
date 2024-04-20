@@ -14,28 +14,10 @@ class NotificationService{
   static const String channelName = 'Finziee';
   static const String channelDescription = 'Finziee';
 
-  final _storage = GetStorage();
-  final _key = 'isNotificationsAllowed';
-  final _notificationTime = 'notificationTime';
-  final ValueHelper valueHelper = ValueHelper();
-
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
   String? notificationPayload;
-
-  _saveNotificationSettingsToStorage(bool isNotificationsAllowed, {TimeOfDay time = const TimeOfDay(hour: 20, minute: 0)}) {
-    _storage.write(_key, isNotificationsAllowed);
-    _storage.write(_notificationTime, valueHelper.getFormattedTimeIn12Hr(time));
-  }
-  
-  bool _loadNotificationAllowedFromStorage() => _storage.read(_key)??false;
-
-  TimeOfDay _loadNotificationTimeFromStorage()=> valueHelper.getTimeOfDayFromString(_storage.read(_notificationTime)??"8:00 PM");
-  
-
-  bool get notificationAllowed => _loadNotificationAllowedFromStorage();
-  TimeOfDay get notificationTime => _loadNotificationTimeFromStorage();
 
   /// Initialize notification
   init() async {
@@ -232,18 +214,6 @@ class NotificationService{
           badge: true,
           sound: true,
         );
-  }
-
-  void turnOffNotifications(bool isNotificationAllowed) async {
-    print('notification turned off with bool val: $isNotificationAllowed');
-    await cancelDailyNotification();
-    _saveNotificationSettingsToStorage(isNotificationAllowed);
-  }
-
-  void turnOnNotifications(bool isNotificationAllowed, TimeOfDay chosenTime) async {
-    print('notification turned on with bool val: $isNotificationAllowed');
-    await scheduleDailyNotification(chosenTime);
-    _saveNotificationSettingsToStorage(isNotificationAllowed, time: chosenTime);
   }
 
   cancelAll() async => await flutterLocalNotificationsPlugin.cancelAll();
