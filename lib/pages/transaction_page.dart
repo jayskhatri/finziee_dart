@@ -249,6 +249,7 @@ class _TransactionPageState extends State<TransactionPage> {
       },
     );
   }
+}
 
  void _getTransactionsListBydate(fromDate, toDate){
     _getTransactionsFromDBBydate(fromDate, toDate);
