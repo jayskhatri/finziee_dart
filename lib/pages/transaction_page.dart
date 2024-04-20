@@ -179,7 +179,7 @@ class _TransactionPageState extends State<TransactionPage> {
             Container(
               // flex:8,
               child: SizedBox(
-                    height: MediaQuery.of(context).size.height*0.8,
+                    height: isOpen? MediaQuery.of(context).size.height*0.6 :  MediaQuery.of(context).size.height*0.8,
                     child: _getTransactionsList()),
             ),
           ],
