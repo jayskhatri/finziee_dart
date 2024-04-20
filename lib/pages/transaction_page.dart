@@ -32,11 +32,17 @@ class _TransactionPageState extends State<TransactionPage> {
   final SettingsProvider settingsProvider = Get.find();
 
   int selectedCategoryIndex = 0;
+  bool isOpen = false;
+  double? _income = 0;
+  double? _expense = 0;
+  double? _total = 0;
+  dynamic _startDate = DateTime.now();
   String currencySymbol = '₹';
 
   @override
   void initState() {
     _getAllCategories();
+    _getStartDate();
     _getAllTransactions();
     super.initState();
   }
@@ -55,17 +61,150 @@ class _TransactionPageState extends State<TransactionPage> {
         title: const Text('Finziee Transactions'),
         centerTitle: true,
         elevation: 0.0,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.arrow_drop_down),
+            onPressed: (){
+              setState((){
+                isOpen = !isOpen;
+              });
+            }
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize:Size.fromHeight(isOpen? 150:0) ,
+          child: isOpen? SizedBox(
+            height: 150,
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: (){
+                        var lastDate = DateTime(DateTime.now().year, DateTime.now().month + 1,0);
+                        var firstDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
+                        _getTransactionsListBydate(firstDate, lastDate);
+                      },
+                      child: Text('This Month'),
+                    ),
+                    ElevatedButton(
+                      onPressed: (){
+                        var lastDate = DateTime(DateTime.now().year, DateTime.now().month,0);
+                        var firstDate = DateTime(DateTime.now().year, DateTime.now().month-1, 1);
+                         _getTransactionsListBydate(firstDate, lastDate);
+                      },
+                      child: Text('Last Month'),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: (){
+                        var lastDate = DateTime(DateTime.now().year, DateTime.now().month+1,0);
+                        var firstDate = DateTime(DateTime.now().year, DateTime.now().month-3, 1);
+                         _getTransactionsListBydate(firstDate, lastDate);
+                      },
+                      child: Text('Last 3 Months'),
+                    ),
+                    ElevatedButton(
+                      onPressed: (){
+                        var lastDate = DateTime(DateTime.now().year, DateTime.now().month+1,0);
+                        var firstDate = DateTime(DateTime.now().year, DateTime.now().month-6, 1);
+                         _getTransactionsListBydate(firstDate, lastDate);
+                      },
+                      child: Text('Last 6 Months'),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: (){
+                      _getAllTransactions();
+                      _getTransactionsList();
+                      },
+                      child: Text('All time'),
+                    ),
+                    ElevatedButton(
+                      onPressed: (){},
+                      child: Text('Custom...'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            ):Container(
+            ),
+          ),
       ),
       drawer: const DrawerNavigation(),
-      body: _getTransactionsList(),
+      body: SizedBox(
+        // flex: 1,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+              Column(children: [
+                Row(
+                  children: [
+                    Icon(Icons.add_circle_outline_outlined),
+                    Text('Income'),
+                  ],
+                ),
+                SizedBox(height: 13.0,),
+                Text(_income.toString()),
+              ],),
+              Column(children: [
+                Row(
+                  children: [
+                    Icon(Icons.remove_circle_outline_outlined),
+                    Text('Expense'),
+                  ],
+                ),
+                SizedBox(height: 13.0,),
+                Text(_expense.toString()),
+              ],),
+              Column(children: [
+                Row(
+                  children: [
+                    Tab(
+                      icon: Image.asset('assets/images/equals.png'),
+                      iconMargin: EdgeInsets.all(1.0),
+                    ),
+                    Text('Balance'),
+                  ],
+                ),
+                SizedBox(height: 1.0,),
+                Text(_total.toString()),
+              ],
+            ),
+            ],
+          ),
+            Container(
+              // flex:8,
+              child: SizedBox(
+                    height: isOpen? MediaQuery.of(context).size.height*0.6 :  MediaQuery.of(context).size.height*0.8,
+                    child: _getTransactionsList()),
+            ),
+          ],
+        ),
+      ),
       floatingActionButton: _addTransactionFloatingButton(context, false),
     );
   }
 
-  Widget _getTransactionsList(){
-    if(_transactions.isEmpty){
+
+  Widget _getTransactionsList() {
+    if (_transactions.isEmpty) {
       return const Center(child: Text('No Transactions'));
-    }else{
+    } else {
       return ListView.builder(
         itemCount: _transactions.length,
         itemBuilder: (context, index) {
@@ -106,15 +245,19 @@ class _TransactionPageState extends State<TransactionPage> {
               )
             ],
           ),
-          );
-        },
-      );
-    }
+        );
+      },
+    );
   }
+}
 
-  String _getDateToShow(String date){
-    return Constants.showDateOnlyFormat.format(ValueHelper().getDateFromISOString(date));
-  }
+ void _getTransactionsListBydate(fromDate, toDate){
+    _getTransactionsFromDBBydate(fromDate, toDate);
+ }
+  
+ String _getDateToShow(String date){
+   return Constants.showDateOnlyFormat.format(ValueHelper().getDateFromISOString(date));
+ }
  
   Widget _addTransactionFloatingButton(BuildContext context, bool isEdit){
     return FloatingActionButton(
@@ -177,11 +320,6 @@ class _TransactionPageState extends State<TransactionPage> {
                         border: OutlineInputBorder( borderRadius: BorderRadius.circular(20.0)),
                         contentPadding: const EdgeInsets.all(10.0),
                       ),
-                      // onChanged: (value) {
-                      //   setState(() {
-                      //     _description = value;
-                      //   });
-                      // },
                     ),
                     const SizedBox(height: 10.0),
                     TextField(
@@ -192,11 +330,6 @@ class _TransactionPageState extends State<TransactionPage> {
                         contentPadding: const EdgeInsets.all(10.0),
                       ),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      // onChanged: (value) {
-                      //   setState(() {
-                      //     _amount = double.parse(value);
-                      //   });
-                      // },
                     ),
                     const SizedBox(height: 10.0),
                     TextField(
@@ -217,7 +350,6 @@ class _TransactionPageState extends State<TransactionPage> {
                           if (dateTime != null) {
                              setState(() {
                              _dateController.text = DateFormat('yyyy-MM-dd').format(dateTime);
-                              // _date =  DateFormat('yyyy-MM-dd').format(dateTime);
                             });
                           }
                         });
@@ -275,7 +407,6 @@ class _TransactionPageState extends State<TransactionPage> {
       },
     );
   }
-
 
   void _deleteTransaction(int transactionId) async {
       await _transactionController.deleteTransaction(transactionId);
@@ -341,8 +472,14 @@ class _TransactionPageState extends State<TransactionPage> {
 
   void _getAllTransactions() async{
     var transactions = await _transactionController.getTransactions();
+    var income = await _transactionController.getAmountByDate(1, _startDate, DateTime.now())?? 0.0;
+    var expense = await _transactionController.getAmountByDate(0,_startDate, DateTime(DateTime.now().year, DateTime.now().month + 1,0))?? 0.0;
+
     setState(() {
       _transactions = transactions;
+      _income = income;
+      _expense = expense;
+      _total = income - expense;
     });
   }
 
@@ -359,6 +496,26 @@ class _TransactionPageState extends State<TransactionPage> {
     _getAllTransactions();
   }
 
+  void _getStartDate() async{
+    var date = await _transactionController.getStartDate();
+    setState(() {
+      _startDate = date;
+    });
+  }
+
+  void _getTransactionsFromDBBydate(fromDate, toDate) async{
+    var transactions = await _transactionController.getTransactionsByDate(fromDate, toDate);
+    var income = await _transactionController.getAmountByDate(1, fromDate, toDate)?? 0.0;
+    var expense = await _transactionController.getAmountByDate(0, fromDate, toDate)?? 0.0;
+
+    setState(() {
+      _transactions = transactions;
+      _income = income;
+      _expense = expense;
+      _total = income - expense;
+    });
+  }
+    
   String getCategoryNameFromCatId(int catId){
     if(catId == -1) return 'Other Expenses';
     return _categories.firstWhere((element) => element.catId == catId).catName??'Other Expenses';
