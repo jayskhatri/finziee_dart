@@ -82,7 +82,7 @@ class DBHelper {
 
   static Future<List<Map<String,dynamic>>> getTransactions() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('transactions');
+    final List<Map<String, dynamic>> maps = await db.query('transactions', orderBy: 'date DESC');
     return maps;
   }
 
@@ -114,6 +114,36 @@ class DBHelper {
     final db = await database;
     String query = 'DROP TABLE IF EXISTS transactions';
     await db.execute(query);
+  }
+
+  static Future<List<Map<String,dynamic>>> getTransactionsByDate(DateTime fromDate, DateTime toDate) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('transactions',where: 'date BETWEEN ? AND ?',whereArgs: [fromDate.toIso8601String(), toDate.toIso8601String()], orderBy: 'date DESC');
+    return maps;
+  }
+
+  static Future<DateTime?> getStartDate() async{
+    final db = await database;
+    final List<Map<String, dynamic>> result = await db.rawQuery(
+      '''SELECT MIN(date) AS firstDate FROM transactions'''
+    );
+    final DateTime? date = result.isNotEmpty && result.first['firstDate'] != null
+    ? DateTime.parse(result.first['firstDate']!)
+    : null;
+    return date;
+  }
+
+
+  static Future<double?> getAmountByDate(int type, DateTime fromDate, DateTime toDate) async {
+    final db = await database;
+    final List<Map<String, dynamic>> result = await db.rawQuery(
+      '''SELECT SUM(t.amount) as totalAmount
+      FROM transactions as t
+      JOIN categories as c ON t.cat_id = c.cat_id
+      WHERE c.cat_type = ? and date BETWEEN ? AND ?''',[type, fromDate.toIso8601String(), toDate.toIso8601String()]
+    );
+    final double? totalAmount = result.first['totalAmount'];
+    return totalAmount;
   }
 
 
