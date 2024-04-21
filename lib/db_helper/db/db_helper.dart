@@ -1,5 +1,6 @@
 import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/models/transaction_model.dart';
+import 'package:finziee_dart/models/trash_model.dart';
 import 'package:finziee_dart/models/recurrence_model.dart';
 import 'package:finziee_dart/util/constants.dart';
 import 'package:sqflite/sqflite.dart';
@@ -66,6 +67,20 @@ class DBHelper {
             recur_shown BOOL DEFAULT 0
           )''';
         await db.execute(recurringTableCreationQuery);
+
+        String trashTableCreationQuery = '''
+          CREATE TABLE IF NOT EXISTS trash (
+            id INTEGER NOT NULL PRIMARY KEY autoincrement, 
+            description TEXT,
+            amount FLOAT NOT NULL DEFAULT '0', 
+            date TEXT NOT NULL, 
+            cat_id INTEGER NOT NULL, 
+            is_auto_added INTEGER DEFAULT 0,
+            trash_date TEXT NOT NULL,
+            FOREIGN KEY(cat_id) REFERENCES categories(cat_id)
+          )
+        ''';
+        await db.execute(trashTableCreationQuery);
 
         for(CategoryModel category in Constants.initialCategories){
           print(category);
@@ -238,8 +253,39 @@ class DBHelper {
     return db.query('recurrence',where: 'recur_on BETWEEN ? AND ? AND recur_shown = ?',whereArgs: [startdate.toIso8601String(),endDate.toIso8601String(), false]);
   }
 
-  /** 
-   * SQL QUERY IN RAW FORM 
-   * SELECT * from recurrence where recur_on BETWEEN '2021-09-01T00:00:00.000' AND '2021-09-30T00:00:00.000' AND recur_shown = 0;
-  */
+  /// SQL QUERY IN RAW FORM 
+  /// SELECT * from recurrence where recur_on BETWEEN '2021-09-01T00:00:00.000' AND '2021-09-30T00:00:00.000' AND recur_shown = 0;
+
+  // TRASH TABLE OPERATIONS
+  static Future<int> insertTrash(TrashModel trash) async {
+    final db = await database;
+    return await db.insert('trash', trash.toJson());
+  }
+
+  static Future<List<Map<String,dynamic>>> getTrash() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('trash');
+    return maps;
+  }
+
+  static Future<int> deleteTrash(int id) async {
+    final db = await database;
+    return await db.delete(
+      'trash',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  static Future<List<Map<String, dynamic>>> getTrashById(int id) async {
+    final db = await database;
+    return db.query('trash',where: 'id=?',whereArgs: [id],limit: 1);
+  }
+
+  static void deleteAllTrash() async {
+    final db = await database;
+    String query = 'DROP TABLE IF EXISTS trash';
+    await db.execute(query);
+  }
+
 }

@@ -1,7 +1,9 @@
 import 'package:finziee_dart/db_helper/category_db_controller.dart';
 import 'package:finziee_dart/db_helper/transaction_db_controller.dart';
+import 'package:finziee_dart/db_helper/trash_db_controller.dart';
 import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/models/transaction_model.dart';
+import 'package:finziee_dart/models/trash_model.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
 import 'package:finziee_dart/pages/helper/select_category_dialog.dart';
 import 'package:finziee_dart/services/settings_provider.dart';
@@ -25,6 +27,7 @@ class _TransactionPageState extends State<TransactionPage> {
 
   final CategoryController _categoryController = Get.find();
   final TransactionController _transactionController = Get.find();
+  final TrashController _trashController = Get.put(TrashController());
   final TextEditingController _selectedCategoryController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -304,6 +307,7 @@ class _TransactionPageState extends State<TransactionPage> {
                         visible: isEdit,
                         child: IconButton(
                           onPressed: () {
+                            _addTransactionToTrash(transactionModel.id??0);
                             _deleteTransaction(transactionModel.id??0);
                             Navigator.of(context).pop();
                           },
@@ -534,5 +538,19 @@ class _TransactionPageState extends State<TransactionPage> {
             1
         ? Colors.white
         : Colors.black;
+  }
+  
+  Future<void> _addTransactionToTrash(int transactionId) async {
+    var transaction = await _transactionController.getTransactionById(transactionId);
+    _trashController.addTrash(
+      trash: TrashModel(
+        description: transaction.description,
+        date: transaction.date,
+        amount: transaction.amount,
+        trashDate: DateTime.now().toIso8601String(),
+        isAutoAdded: transaction.isAutoAdded,
+        catId: transaction.catId
+      )
+    );
   }
 }

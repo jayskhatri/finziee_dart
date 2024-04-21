@@ -3,6 +3,7 @@ import 'package:finziee_dart/pages/helper/themes.dart';
 import 'package:finziee_dart/pages/home_page.dart';
 import 'package:finziee_dart/pages/recurring_page.dart';
 import 'package:finziee_dart/pages/settings_page.dart';
+import 'package:finziee_dart/pages/trash_page.dart';
 import 'package:finziee_dart/pages/transaction_page.dart';
 import 'package:finziee_dart/services/notification_service.dart';
 import 'package:finziee_dart/services/settings_provider.dart';
@@ -51,27 +52,10 @@ class MyApp extends StatelessWidget {
             '/categories': (context) => const CategoriesPage(),
             '/settings': (context) => const SettingsPage(),
             '/recurring': (context) => const RecurringPage(),
+            '/trash':(context) => const TrashPage(),
           },
         );
       }),
     );
   }
 }
-
-/**
- * MaterialApp(
-          debugShowCheckedModeBanner: false,
-          initialRoute: '/',
-          navigatorKey: navigatorKey,
-          theme: Themes.light,
-          darkTheme: Themes.dark,
-          themeMode: SharedPref().theme,
-          routes: {
-            '/': (context) => const HomePage(),
-            '/transactions':(context) =>  const TransactionPage(),
-            '/categories':(context) =>  const CategoriesPage(),
-            '/settings' :(context) => const SettingsPage(),
-            '/recurring':(context) => const RecurringPage(),
-          },
-      );
- */
