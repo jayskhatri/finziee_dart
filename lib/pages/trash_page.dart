@@ -1,8 +1,12 @@
 import 'package:finziee_dart/db_helper/category_db_controller.dart';
+import 'package:finziee_dart/db_helper/transaction_db_controller.dart';
 import 'package:finziee_dart/db_helper/trash_db_controller.dart';
 import 'package:finziee_dart/models/category_model.dart';
+import 'package:finziee_dart/models/transaction_model.dart';
 import 'package:finziee_dart/models/trash_model.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
+import 'package:finziee_dart/util/constants.dart';
+import 'package:finziee_dart/util/value_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -19,6 +23,9 @@ class _TrashPageState extends State<TrashPage>{
 
   final CategoryController _categoryController = Get.find();
   final TrashController _trashController = Get.put(TrashController());
+  final TransactionController _transactionController = Get.find();
+
+  bool? deletePermanently = false;
 
   @override
   void initState() {
@@ -54,7 +61,7 @@ class _TrashPageState extends State<TrashPage>{
                 leading: Icon(_getIconByTrashCatId(_trash[index].catId)),
                 title: Text(_trash[index].description??''),
                 subtitle: Text(_trash[index].amount.toString()),
-                trailing: Text(_trash[index].date??DateTime.now().toString()),
+                trailing: Text(_getDateToShow(_trash[index].date??DateTime.now().toString())),
                 onTap: (){
                   _createDialog(context, _trash[index]);
                 }
@@ -73,6 +80,7 @@ class _TrashPageState extends State<TrashPage>{
   }
 
   void _createDialog(BuildContext context, TrashModel trashModel) {
+    deletePermanently = false;
     showDialog(
       context: context,
       builder:  (BuildContext context) {
@@ -81,18 +89,65 @@ class _TrashPageState extends State<TrashPage>{
             return AlertDialog(
               content: SizedBox(
                 width: MediaQuery.of(context).size.width*0.6,
-                child: const Column(
+                child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Choose Action"),
+                        // ignore: deprecated_member_use
+                        Text("Choose Action", textScaleFactor: 1.5),
+                        ListTile(
+                          title: Text('Restore'),
+                          leading: Radio<bool>(
+                            value: false,
+                            groupValue: deletePermanently,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                deletePermanently = value;
+                              });
+                            },
+                          ),
+                        ),
+                        ListTile(
+                          title: Text('Delete forever'),
+                          leading: Radio<bool>(
+                            value: true,
+                            groupValue: deletePermanently,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                deletePermanently = value;
+                              });
+                            },
+                          ),
+                        ),
                       ],
                     ),
                   ]
                 )
               ),
+              actions:  <Widget>[
+                    TextButton(
+                      child: const Text('Cancel'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    TextButton(
+                      child: const Text('Okay'),
+                      onPressed: (){
+                        if (deletePermanently??false) {
+                            _deleteTrashById(trashModel.id??0);
+                        }else{
+                          _createTransaction(trashModel);
+                          _deleteTrashById(trashModel.id??0);
+                        }
+                        _getAllTrash();
+                        Navigator.of(context).pop();
+                      }
+                    )
+                  ],
             );
           }
         );
@@ -104,7 +159,6 @@ class _TrashPageState extends State<TrashPage>{
     var trash = await _trashController.getTrash();
     setState(() {
       _trash = trash;
-      print(_trash.length);
     });
   }
 
@@ -114,5 +168,25 @@ class _TrashPageState extends State<TrashPage>{
       _categories = catagories;
     });
   }
+
+  void _createTransaction(TrashModel trash) {
+    _transactionController.addTransaction(
+      transaction: TransactionModel(
+        description: trash.description,
+        amount: trash.amount,
+        date: trash.date,
+        catId: trash.catId,
+        isAutoAdded: trash.isAutoAdded,
+      )
+    );
+  }
+
+  void _deleteTrashById(int trashId) {
+    _trashController.deleteTrash(trashId);
+  }
+
+  String _getDateToShow(String date){
+   return Constants.showDateOnlyFormat.format(ValueHelper().getDateFromISOString(date));
+ }
 
 }

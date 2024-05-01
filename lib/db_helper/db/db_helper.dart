@@ -139,14 +139,14 @@ class DBHelper {
     return maps;
   }
 
-  static Future<DateTime?> getStartDate() async{
+  static Future<DateTime> getStartDate() async{
     final db = await database;
     final List<Map<String, dynamic>> result = await db.rawQuery(
       '''SELECT MIN(date) AS firstDate FROM transactions'''
     );
-    final DateTime? date = result.isNotEmpty && result.first['firstDate'] != null
-    ? DateTime.parse(result.first['firstDate']!)
-    : null;
+    final DateTime date = result.isNotEmpty && result.first['firstDate'] != null?
+    DateTime.parse(result.first['firstDate']!)
+    : DateTime.now();
     return date;
   }
 
@@ -263,7 +263,9 @@ class DBHelper {
   }
 
   static Future<List<Map<String,dynamic>>> getTrash() async {
+    deleteExpiredTransactionsFromTrash();
     final db = await database;
+
     final List<Map<String, dynamic>> maps = await db.query('trash');
     return maps;
   }
@@ -286,6 +288,20 @@ class DBHelper {
     final db = await database;
     String query = 'DROP TABLE IF EXISTS trash';
     await db.execute(query);
+  }
+
+  static void deleteExpiredTransactionsFromTrash() async {
+    final db = await database;
+
+    final now = DateTime.now();
+    final thirtyDaysAgo = now.subtract(Duration(days: 1));
+
+    // Delete old transactions
+    await db.delete(
+      'trash',
+      where: 'trash_date < ?',
+      whereArgs: [thirtyDaysAgo.millisecondsSinceEpoch],
+    );
   }
 
 }
