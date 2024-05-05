@@ -294,13 +294,13 @@ class DBHelper {
     final db = await database;
 
     final now = DateTime.now();
-    final thirtyDaysAgo = now.subtract(Duration(days: 1));
+    final thirtyDaysAgo = now.subtract(Duration(days: 30));
 
     // Delete old transactions
     await db.delete(
       'trash',
       where: 'trash_date < ?',
-      whereArgs: [thirtyDaysAgo.millisecondsSinceEpoch],
+      whereArgs: [thirtyDaysAgo.toIso8601String()],
     );
   }
 
