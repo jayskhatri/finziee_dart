@@ -189,12 +189,9 @@ class _TransactionPageState extends State<TransactionPage> {
             ),
             ],
           ),
-            Container(
-              // flex:8,
-              child: SizedBox(
-                    height: isOpen? MediaQuery.of(context).size.height*0.6 :  MediaQuery.of(context).size.height*0.8,
-                    child: _getTransactionsList()),
-            ),
+            SizedBox(
+                  height: isOpen? MediaQuery.of(context).size.height*0.6 :  MediaQuery.of(context).size.height*0.8,
+                  child: _getTransactionsList()),
           ],
         ),
       ),
@@ -474,6 +471,7 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void _getAllTransactions() async{
+    _getStartDate();
     var transactions = await _transactionController.getTransactions();
     var income = await _transactionController.getAmountByDate(1, _startDate, DateTime(DateTime.now().year, DateTime.now().month + 1,0))?? 0.0;
     var expense = await _transactionController.getAmountByDate(0,_startDate, DateTime(DateTime.now().year, DateTime.now().month + 1,0))?? 0.0;
@@ -489,9 +487,9 @@ class _TransactionPageState extends State<TransactionPage> {
   void _createTransaction() {
     var dateTime = DateTime.parse( _dateController.text);
     dateTime = DateTime(
-                        dateTime!.year,
-                        dateTime!.month,
-                        dateTime!.day,
+                        dateTime.year,
+                        dateTime.month,
+                        dateTime.day,
                         DateTime.now().hour,
                         DateTime.now().minute,
                         DateTime.now().second,
@@ -516,6 +514,7 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void _getTransactionsFromDBBydate(fromDate, toDate) async{
+    _getStartDate();
     var transactions = await _transactionController.getTransactionsByDate(fromDate, toDate);
     var income = await _transactionController.getAmountByDate(1, fromDate, toDate)?? 0.0;
     var expense = await _transactionController.getAmountByDate(0, fromDate, toDate)?? 0.0;
