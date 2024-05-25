@@ -388,6 +388,7 @@ class _TransactionPageState extends State<TransactionPage> {
                       child: (isEdit)? const Text('Update') : const Text('Create'),
                       onPressed: (){
                         if(!isEdit) {
+                          _dateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
                           _createTransaction();
                         } else {
                           transactionModel.description = _descriptionController.text;
