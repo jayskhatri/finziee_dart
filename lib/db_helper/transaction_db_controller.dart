@@ -53,8 +53,13 @@ class TransactionController{
     return date;
   }
 
-  //delete particular category
+  //delete particular transaction
   Future<int> deleteTransaction(int? id) async {
     return await DBHelper.deleteTransaction(id!);
+  }
+
+  Future<TransactionModel> getTransactionById(int? id) async {
+    List<Map<String,dynamic>> transaction = await DBHelper.getTransactionById(id!);
+    return TransactionModel.fromJson(transaction[0]);
   }
 }

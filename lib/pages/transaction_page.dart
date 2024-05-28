@@ -1,7 +1,9 @@
 import 'package:finziee_dart/db_helper/category_db_controller.dart';
 import 'package:finziee_dart/db_helper/transaction_db_controller.dart';
+import 'package:finziee_dart/db_helper/trash_db_controller.dart';
 import 'package:finziee_dart/models/category_model.dart';
 import 'package:finziee_dart/models/transaction_model.dart';
+import 'package:finziee_dart/models/trash_model.dart';
 import 'package:finziee_dart/pages/helper/drawer_navigation.dart';
 import 'package:finziee_dart/pages/helper/select_category_dialog.dart';
 import 'package:finziee_dart/services/settings_provider.dart';
@@ -25,6 +27,7 @@ class _TransactionPageState extends State<TransactionPage> {
 
   final CategoryController _categoryController = Get.find();
   final TransactionController _transactionController = Get.find();
+  final TrashController _trashController = Get.put(TrashController());
   final TextEditingController _selectedCategoryController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -125,7 +128,6 @@ class _TransactionPageState extends State<TransactionPage> {
                     ElevatedButton(
                       onPressed: (){
                       _getAllTransactions();
-                      _getTransactionsList();
                       },
                       child: Text('All time'),
                     ),
@@ -187,12 +189,9 @@ class _TransactionPageState extends State<TransactionPage> {
             ),
             ],
           ),
-            Container(
-              // flex:8,
-              child: SizedBox(
-                    height: isOpen? MediaQuery.of(context).size.height*0.6 :  MediaQuery.of(context).size.height*0.8,
-                    child: _getTransactionsList()),
-            ),
+            SizedBox(
+                  height: isOpen? MediaQuery.of(context).size.height*0.6 :  MediaQuery.of(context).size.height*0.8,
+                  child: _getTransactionsList()),
           ],
         ),
       ),
@@ -304,6 +303,7 @@ class _TransactionPageState extends State<TransactionPage> {
                         visible: isEdit,
                         child: IconButton(
                           onPressed: () {
+                            _addTransactionToTrash(transactionModel.id??0);
                             _deleteTransaction(transactionModel.id??0);
                             Navigator.of(context).pop();
                           },
@@ -388,6 +388,7 @@ class _TransactionPageState extends State<TransactionPage> {
                       child: (isEdit)? const Text('Update') : const Text('Create'),
                       onPressed: (){
                         if(!isEdit) {
+                          _dateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
                           _createTransaction();
                         } else {
                           transactionModel.description = _descriptionController.text;
@@ -444,7 +445,7 @@ class _TransactionPageState extends State<TransactionPage> {
       _amountController.text = '';
       selectedCategoryIndex = 0;
       _selectedCategoryController.text ='';
-      _dateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      _dateController.text = _getDateToShow(DateTime.now().toIso8601String());
     }
   }
  
@@ -471,8 +472,9 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void _getAllTransactions() async{
+    _getStartDate();
     var transactions = await _transactionController.getTransactions();
-    var income = await _transactionController.getAmountByDate(1, _startDate, DateTime.now())?? 0.0;
+    var income = await _transactionController.getAmountByDate(1, _startDate, DateTime(DateTime.now().year, DateTime.now().month + 1,0))?? 0.0;
     var expense = await _transactionController.getAmountByDate(0,_startDate, DateTime(DateTime.now().year, DateTime.now().month + 1,0))?? 0.0;
 
     setState(() {
@@ -484,11 +486,20 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void _createTransaction() {
+    var dateTime = DateTime.parse( _dateController.text);
+    dateTime = DateTime(
+                        dateTime.year,
+                        dateTime.month,
+                        dateTime.day,
+                        DateTime.now().hour,
+                        DateTime.now().minute,
+                        DateTime.now().second,
+                      );
     _transactionController.addTransaction(
       transaction: TransactionModel(
         description: _descriptionController.text,
         amount: double.parse(_amountController.text), 
-        date: _dateController.text,
+        date: dateTime.toIso8601String(),
         catId: _selectedCategoryController.text.isEmpty ? 1 : _categories[selectedCategoryIndex].catId,
         isAutoAdded: 0,
       )
@@ -504,6 +515,7 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void _getTransactionsFromDBBydate(fromDate, toDate) async{
+    _getStartDate();
     var transactions = await _transactionController.getTransactionsByDate(fromDate, toDate);
     var income = await _transactionController.getAmountByDate(1, fromDate, toDate)?? 0.0;
     var expense = await _transactionController.getAmountByDate(0, fromDate, toDate)?? 0.0;
@@ -534,5 +546,19 @@ class _TransactionPageState extends State<TransactionPage> {
             1
         ? Colors.white
         : Colors.black;
+  }
+  
+  Future<void> _addTransactionToTrash(int transactionId) async {
+    var transaction = await _transactionController.getTransactionById(transactionId);
+    _trashController.addTrash(
+      trash: TrashModel(
+        description: transaction.description,
+        date: transaction.date,
+        amount: transaction.amount,
+        trashDate: DateTime.now().toIso8601String(),
+        isAutoAdded: transaction.isAutoAdded,
+        catId: transaction.catId
+      )
+    );
   }
 }

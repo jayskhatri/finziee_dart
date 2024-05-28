@@ -56,6 +56,14 @@ class _DrawerNavigationState extends State<DrawerNavigation> {
                   Navigator.pushReplacementNamed(context, '/categories');
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('Trash'),
+                onTap: (){
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  Navigator.pushReplacementNamed(context, '/trash');
+                },
+              ),
               const Divider(color: Colors.black87),
               ListTile(
                 leading: const Icon(Icons.settings),
