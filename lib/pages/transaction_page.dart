@@ -144,7 +144,7 @@ class _TransactionPageState extends State<TransactionPage> {
           ),
       ),
       drawer: const DrawerNavigation(),
-      body: SizedBox(
+      body: SingleChildScrollView(
         // flex: 1,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -279,6 +279,7 @@ class _TransactionPageState extends State<TransactionPage> {
   
   void _createTransactionDialog(BuildContext context, bool isEdit, TransactionModel transactionModel) {
     initialiseVariables(isEdit, transactionModel);
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -286,129 +287,208 @@ class _TransactionPageState extends State<TransactionPage> {
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
               content: SizedBox(
-                width: MediaQuery.of(context).size.width*0.6,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        icon: const Icon(Icons.close),
-                      ),
-                      Visibility(
-                        visible: isEdit,
-                        child: IconButton(
-                          onPressed: () {
-                            _addTransactionToTrash(transactionModel.id??0);
-                            _deleteTransaction(transactionModel.id??0);
-                            Navigator.of(context).pop();
-                          },
-                          icon: const Icon(Icons.delete),
-                        ),
-                      ),
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      _buildDialogHeader(context, isEdit, transactionModel),
+                      const SizedBox(height: 10.0),
+                      _buildDescriptionField(),
+                      const SizedBox(height: 20.0),
+                      _buildCategorySelector(context, setState),
+                      const SizedBox(height: 10.0),
+                      _buildAmountField(),
+                      const SizedBox(height: 10.0),
+                      _buildDateSelector(context, setState),
                     ],
                   ),
-                    const SizedBox(height: 10.0),
-                    TextField(
-                      controller: _descriptionController,
-                      decoration: InputDecoration(
-                        labelText: 'Description',
-                        border: OutlineInputBorder( borderRadius: BorderRadius.circular(20.0)),
-                        contentPadding: const EdgeInsets.all(10.0),
-                      ),
-                    ),
-                    const SizedBox(height: 10.0),
-                    TextField(
-                      controller: _amountController,
-                      decoration: InputDecoration(
-                        labelText: 'Amount',
-                        border: OutlineInputBorder( borderRadius: BorderRadius.circular(20.0)),
-                        contentPadding: const EdgeInsets.all(10.0),
-                      ),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    ),
-                    const SizedBox(height: 10.0),
-                    TextField(
-                      readOnly: true,
-                      controller: _dateController,
-                      decoration: InputDecoration(
-                        labelText: 'Date',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0)),
-                        contentPadding: const EdgeInsets.all(10.0),
-                      ),
-                      onTap: () async {
-                        await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                        ).then((dateTime) {
-                          if (dateTime != null) {
-                             setState(() {
-                             _dateController.text = DateFormat('yyyy-MM-dd').format(dateTime);
-                            });
-                          }
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 10.0),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            readOnly: true,
-                            controller: _selectedCategoryController,
-                            onTap: () => _dialogBox(context, setState),
-                            decoration: InputDecoration(
-                              labelText: 'Select Category',
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0)),
-                              contentPadding: const EdgeInsets.all(10.0),
-                            ),
-                          ),
-                         ),
-                         const SizedBox(width: 10.0),
-                        _getIconWidget(),
-                      ],  
-                    ),
-                  ],
-                ), 
+                ),
               ),
-              actions: <Widget>[
-                    TextButton(
-                      child: const Text('Cancel'),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                    TextButton(
-                      child: (isEdit)? const Text('Update') : const Text('Create'),
-                      onPressed: (){
-                        if(!isEdit) {
-                          _dateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
-                          _createTransaction();
-                        } else {
-                          transactionModel.description = _descriptionController.text;
-                          transactionModel.amount = double.parse(_amountController.text);
-                          transactionModel.date = _dateController.text;
-                          transactionModel.catId = _selectedCategoryController.text.isEmpty ? 1 : _categories[selectedCategoryIndex].catId;
-                          _updateTransaction(transactionModel);
-                        }
-                        resetVariables();
-                        Navigator.of(context).pop();
-                      }
-                    )
-                  ],
+              actions: _buildDialogActions(context, isEdit, transactionModel),
             );
-          }
+          },
         );
       },
     );
   }
 
+  Widget _buildDialogHeader(BuildContext context, bool isEdit, TransactionModel transactionModel) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.close),
+        ),
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            child: Center(
+              child: Text(
+                isEdit ? 'Edit Transaction' : 'Add Transaction',
+                style: const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ),
+        if (isEdit)
+          IconButton(
+            onPressed: () {
+              _addTransactionToTrash(transactionModel.id ?? 0);
+              _deleteTransaction(transactionModel.id ?? 0);
+              Navigator.of(context).pop();
+            },
+            icon: const Icon(Icons.delete),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildDescriptionField() {
+    return Row(
+      children: [
+        const Text('Description:'),
+        const SizedBox(width: 10.0),
+        Expanded(
+          child: TextField(
+            controller: _descriptionController,
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(vertical: 5.0),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategorySelector(BuildContext context, StateSetter setState) {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            readOnly: true,
+            controller: _selectedCategoryController,
+            onTap: () => _dialogBox(context, setState),
+            decoration: InputDecoration(
+              labelText: 'Select Category',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(30.0)),
+              contentPadding: const EdgeInsets.all(10.0),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10.0),
+        _getIconWidget(),
+      ],
+    );
+  }
+
+  Widget _buildAmountField() {
+    return Row(
+      children: [
+        const Text('Amount:'),
+        const SizedBox(width: 10.0),
+        Expanded(
+          child: TextField(
+            controller: _amountController,
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(vertical: 5.0),
+            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateSelector(BuildContext context, StateSetter setState) {
+    return Row(
+      children: [
+        const Text('Date:'),
+        const SizedBox(width: 10.0),
+        Expanded(
+          child: TextField(
+            readOnly: true,
+            controller: _dateController,
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(vertical: 5.0),
+            ),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.calendar_today),
+          onPressed: () async {
+            await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2100),
+            ).then((dateTime) {
+              if (dateTime != null) {
+                setState(() {
+                  _dateController.text = _getDateToShow(dateTime.toIso8601String());
+                });
+              }
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildDialogActions(BuildContext context, bool isEdit, TransactionModel transactionModel) {
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          TextButton(
+            child: _buildActionButton('Cancel'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          TextButton(
+            child: _buildActionButton(isEdit ? 'Update' : 'Create'),
+            onPressed: () {
+              if (!isEdit) {
+                _createTransaction();
+              } else {
+                transactionModel.description = _descriptionController.text;
+                transactionModel.amount = double.parse(_amountController.text);
+                transactionModel.date = DateFormat('dd-MM-yyyy').parse(_dateController.text).toIso8601String();
+                transactionModel.catId = _selectedCategoryController.text.isEmpty
+                    ? 1
+                    : _categories[selectedCategoryIndex].catId;
+                _updateTransaction(transactionModel);
+              }
+              resetVariables();
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    ];
+  }
+
+  Widget _buildActionButton(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+  
   void _deleteTransaction(int transactionId) async {
       await _transactionController.deleteTransaction(transactionId);
       _getAllTransactions();
@@ -486,7 +566,7 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void _createTransaction() {
-    var dateTime = DateTime.parse( _dateController.text);
+    var dateTime = DateFormat('dd-MM-yyyy').parse(_dateController.text);
     dateTime = DateTime(
                         dateTime.year,
                         dateTime.month,
